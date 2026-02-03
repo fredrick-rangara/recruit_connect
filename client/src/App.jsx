@@ -7,6 +7,7 @@ import Dashboard from './features/dashboard/Dashboard';
 import DashboardHome from './features/dashboard/DashboardHome';
 import Applications from './features/dashboard/Applications';
 import JobBoard from './features/jobs/JobBoard';
+import JobDetails from './features/jobs/JobDetails';
 import './App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/jobs" element={<JobBoard />} />
+            <Route path="/jobs/:id" element={<JobDetails />} />
             
             {/* Dashboard Nested Routes */}
             <Route path="/dashboard" element={<Dashboard />}>
