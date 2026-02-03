@@ -6,6 +6,7 @@ import Signup from './features/auth/Signup';
 import Dashboard from './features/dashboard/Dashboard';
 import DashboardHome from './features/dashboard/DashboardHome';
 import Applications from './features/dashboard/Applications';
+import ProfileSettings from './features/dashboard/ProfileSettings';
 import JobBoard from './features/jobs/JobBoard';
 import JobDetails from './features/jobs/JobDetails';
 import './App.css';
@@ -29,7 +30,7 @@ function App() {
               <Route path="applications" element={<Applications />} />
               <Route path="saved" element={<div><h2>Saved Jobs</h2></div>} />
               <Route path="messages" element={<div><h2>Messages</h2></div>} />
-              <Route path="settings" element={<div><h2>Settings</h2></div>} />
+              <Route path="settings" element={<ProfileSettings />} />
             </Route>
           </Routes>
         </main>
