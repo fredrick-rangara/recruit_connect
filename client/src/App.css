@@ -17,6 +17,11 @@
   padding-top: 2rem;
 }
 
+.main-content-fluid {
+  flex: 1;
+  width: 100%;
+}
+
 .page-container {
   max-width: 1200px;
   width: 100%;
