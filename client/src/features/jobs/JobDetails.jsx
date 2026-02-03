@@ -53,7 +53,7 @@ const JobDetails = () => {
               </div>
             </div>
             <h1 className="job-title-xl">{job.title}</h1>
-            <p className="job-company-location">{job.company} • {job.location}</p>
+            <p className="job-company-location">{job.company} | {job.location}</p>
             
             <div className="quick-stats">
               <div className="stat-item">

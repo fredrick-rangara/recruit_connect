@@ -66,7 +66,7 @@ const Home = () => {
               <div className="company-logo">{job.company[0]}</div>
               <div className="job-info">
                 <h3>{job.title}</h3>
-                <p>{job.company} • {job.location}</p>
+                <p>{job.company} | {job.location}</p>
               </div>
               <Link to={`/jobs/${job.id}`} className="apply-btn">View Role</Link>
             </div>

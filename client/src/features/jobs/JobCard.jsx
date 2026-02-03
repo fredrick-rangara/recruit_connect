@@ -19,7 +19,7 @@ const JobCard = ({ job }) => {
       
       <div className="job-card-content">
         <h3 className="job-title-text">{job.title}</h3>
-        <p className="job-company-info">{job.company} • {job.location}</p>
+        <p className="job-company-info">{job.company} | {job.location}</p>
         
         <div className="job-tags">
           {job.tags?.map(tag => (

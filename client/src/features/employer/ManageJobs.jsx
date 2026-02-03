@@ -35,7 +35,7 @@ const ManageJobs = () => {
           <div key={job.id} className="posting-row">
             <div className="col-job">
               <h3 className="job-title">{job.title}</h3>
-              <span className="job-meta-details">{job.category} • Posted on {job.postedDate}</span>
+              <span className="job-meta-details">{job.category} | Posted on {job.postedDate}</span>
             </div>
             
             <div className="col-applicants text-center">

@@ -28,7 +28,6 @@ const JobBoard = () => {
           <p className="board-subtitle">Explore 10,000+ opportunities across top tech companies worldwide.</p>
           
           <div className="board-search-bar">
-            <span className="search-icon-large">🔍</span>
             <input 
               type="text" 
               placeholder="Search by job title, company, or keywords..." 

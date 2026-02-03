@@ -34,7 +34,7 @@ const EmployerSidebar = () => {
       <div className="sidebar-bottom-action">
         <div className="recruit-status-card">
           <h4>Active Recruitment</h4>
-          <p>3 active roles • 24 new applicants</p>
+          <p>3 active roles | 24 new applicants</p>
         </div>
       </div>
     </aside>
