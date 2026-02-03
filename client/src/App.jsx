@@ -3,7 +3,12 @@ import Navbar from './components/Navbar';
 import Home from './features/home/Home';
 import Login from './features/auth/Login';
 import Signup from './features/auth/Signup';
+import Dashboard from './features/dashboard/Dashboard';
 import './App.css';
+
+// Dashboard Tab Placeholders
+const DashboardOverview = () => <div><h2>Dashboard Overview</h2><p>Welcome to your career hub.</p></div>;
+const Applications = () => <div><h2>My Applications</h2><p>Track your job applications here.</p></div>;
 
 function App() {
   return (
@@ -15,6 +20,15 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            
+            {/* Dashboard Nested Routes */}
+            <Route path="/dashboard" element={<Dashboard />}>
+              <Route index element={<DashboardOverview />} />
+              <Route path="applications" element={<Applications />} />
+              <Route path="saved" element={<div><h2>Saved Jobs</h2></div>} />
+              <Route path="messages" element={<div><h2>Messages</h2></div>} />
+              <Route path="settings" element={<div><h2>Settings</h2></div>} />
+            </Route>
           </Routes>
         </main>
       </div>
