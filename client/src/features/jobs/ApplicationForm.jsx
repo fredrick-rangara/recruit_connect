@@ -25,7 +25,6 @@ const ApplicationForm = ({ jobTitle, company, onClose }) => {
   if (isSubmitted) {
     return (
       <div className="application-success">
-        <div className="success-icon">🎉</div>
         <h2>Application Sent!</h2>
         <p>Your application for <strong>{jobTitle}</strong> at <strong>{company}</strong> has been successfully submitted. The hiring team will review it shortly.</p>
         <button className="done-btn" onClick={onClose}>Done</button>
@@ -38,7 +37,7 @@ const ApplicationForm = ({ jobTitle, company, onClose }) => {
       <div className="form-header">
         <h2>Apply for {jobTitle}</h2>
         <p>{company}</p>
-        <button className="close-form-btn" onClick={onClose}>✕</button>
+        <button className="close-form-btn" onClick={onClose}>Close</button>
       </div>
       
       <form className="app-form" onSubmit={handleSubmit}>
@@ -55,7 +54,6 @@ const ApplicationForm = ({ jobTitle, company, onClose }) => {
         <div className="form-group">
           <label>Upload Resume (PDF)</label>
           <div className="file-input-container">
-            <span className="file-icon">📁</span>
             <input type="file" accept=".pdf" required />
             <p className="file-hint">Drag and drop or click to upload</p>
           </div>
