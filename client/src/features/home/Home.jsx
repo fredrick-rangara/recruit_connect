@@ -75,6 +75,8 @@ const Home = () => {
             </div>
           ))}
         </div>
+      </section>
+
       {/* Why Choose Us Section */}
       <section className="why-us">
         <h2 className="section-title text-center">Why RecruitConnect?</h2>
