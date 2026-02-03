@@ -75,6 +75,35 @@ const Home = () => {
             </div>
           ))}
         </div>
+      {/* Why Choose Us Section */}
+      <section className="why-us">
+        <h2 className="section-title text-center">Why RecruitConnect?</h2>
+        <div className="features-grid">
+          <div className="feature-item">
+            <div className="feature-icon-box">🎯</div>
+            <h3>Smart Matching</h3>
+            <p>Our algorithms connect you with the most relevant opportunities based on your unique skills.</p>
+          </div>
+          <div className="feature-item">
+            <div className="feature-icon-box">⚡</div>
+            <h3>Fast Application</h3>
+            <p>Apply to your dream jobs with just one click using our streamlined "Quick Apply" feature.</p>
+          </div>
+          <div className="feature-item">
+            <div className="feature-icon-box">🛡️</div>
+            <h3>Verified Employers</h3>
+            <p>We verify every company on our platform to ensure a safe and trustworthy job search.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Final Call to Action */}
+      <section className="bottom-cta">
+        <div className="cta-content">
+          <h2>Ready to take the next step?</h2>
+          <p>Join thousands of professionals and companies growing with RecruitConnect.</p>
+          <Link to="/signup" className="cta-btn primary">Join Now — It's Free</Link>
+        </div>
       </section>
     </div>
   );
