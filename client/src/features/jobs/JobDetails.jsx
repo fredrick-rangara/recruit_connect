@@ -38,7 +38,7 @@ const JobDetails = () => {
   return (
     <div className="job-details-container">
       <nav className="breadcrumb">
-        <Link to="/jobs">← Back to Job Board</Link>
+        <Link to="/jobs">Back to Job Board</Link>
       </nav>
 
       <div className="job-details-layout">
@@ -57,14 +57,12 @@ const JobDetails = () => {
             
             <div className="quick-stats">
               <div className="stat-item">
-                <span className="stat-icon">💰</span>
                 <div className="stat-text">
                   <label>Salary</label>
                   <span>{job.salary}</span>
                 </div>
               </div>
               <div className="stat-item">
-                <span className="stat-icon">🕒</span>
                 <div className="stat-text">
                   <label>Job Type</label>
                   <span>{job.type}</span>
@@ -117,7 +115,7 @@ const JobDetails = () => {
           <div className="company-brief-card">
             <h3>About {job.company}</h3>
             <p>{job.companyInfo}</p>
-            <Link to={`/company/${job.company.toLowerCase()}`} className="view-company-link">View Company Profile →</Link>
+            <Link to={`/company/${job.company.toLowerCase()}`} className="view-company-link">View Company Profile</Link>
           </div>
         </aside>
       </div>
