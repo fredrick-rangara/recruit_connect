@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './features/auth/Login';
+import Signup from './features/auth/Signup';
 import './App.css';
 
 // Placeholder components for routing verification
 const Home = () => <div className="page-container"><h1>Welcome to RecruitConnect</h1><p>Connecting the best talent with the best opportunities.</p></div>;
-const SignupPlaceholder = () => <div className="page-container"><h1>Signup Page Coming Soon</h1></div>;
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignupPlaceholder />} />
+            <Route path="/signup" element={<Signup />} />
           </Routes>
         </main>
       </div>
