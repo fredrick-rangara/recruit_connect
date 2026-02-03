@@ -13,6 +13,7 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    role: 'job_seeker', // New: Track role during login
   });
   
   // State for handling potential errors and loading status
@@ -42,14 +43,19 @@ const Login = () => {
       // Mock login logic - this will be replaced with a real fetch/axios call later
       setTimeout(() => {
         if (formData.email && formData.password) {
-          // Dispatching success to the Redux store
+          // Dispatching success to the Redux store with the selected role
           dispatch(setCredentials({
             user: { name: 'Demo User', email: formData.email },
             token: 'mock-jwt-token',
-            role: 'job_seeker',
+            role: formData.role,
           }));
-          // Redirect the user to the home page after a successful login
-          navigate('/');
+          
+          // Redirect the user based on their specific role
+          if (formData.role === 'employer') {
+            navigate('/employer');
+          } else {
+            navigate('/');
+          }
         } else {
           setError('Invalid email or password');
         }
@@ -82,6 +88,32 @@ const Login = () => {
               onChange={handleChange}
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label>Login as:</label>
+            <div className="role-selector">
+              <label className={`role-option ${formData.role === 'job_seeker' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="job_seeker"
+                  checked={formData.role === 'job_seeker'}
+                  onChange={handleChange}
+                />
+                <div className="role-text">Job Seeker</div>
+              </label>
+              <label className={`role-option ${formData.role === 'employer' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="employer"
+                  checked={formData.role === 'employer'}
+                  onChange={handleChange}
+                />
+                <div className="role-text">Employer</div>
+              </label>
+            </div>
           </div>
           
           <div className="form-group">

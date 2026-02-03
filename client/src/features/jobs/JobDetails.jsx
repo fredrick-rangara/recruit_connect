@@ -100,17 +100,19 @@ const JobDetails = () => {
 
         {/* Sidebar / Action Area */}
         <aside className="job-details-sidebar">
-          <div className="apply-card">
-            <h3>Interested in this role?</h3>
-            <p>Apply now and take the next step in your career with {job.company}.</p>
-            <button 
-              className="apply-now-main-btn"
-              onClick={() => setShowApplyForm(true)}
-            >
-              Apply Now
-            </button>
-            <button className="save-job-btn">Save for Later</button>
-          </div>
+          {userRole !== 'employer' && (
+            <div className="apply-card">
+              <h3>Interested in this role?</h3>
+              <p>Apply now and take the next step in your career with {job.company}.</p>
+              <button 
+                className="apply-now-main-btn"
+                onClick={() => setShowApplyForm(true)}
+              >
+                Apply Now
+              </button>
+              <button className="save-job-btn">Save for Later</button>
+            </div>
+          )}
 
           <div className="company-brief-card">
             <h3>About {job.company}</h3>

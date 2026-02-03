@@ -56,8 +56,12 @@ const Signup = () => {
           token: 'mock-jwt-token',
           role: formData.role,
         }));
-        // Redirect to dashboard/home after registration
-        navigate('/');
+        // Redirect based on role after registration
+        if (formData.role === 'employer') {
+          navigate('/employer');
+        } else {
+          navigate('/');
+        }
         setIsLoading(false);
       }, 1000);
     } catch (err) {
