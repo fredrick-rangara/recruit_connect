@@ -9,6 +9,13 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
+  // Mock featured jobs to avoid 'undefined' error
+  const featuredJobs = [
+    { id: 1, title: 'Senior Frontend Developer', company: 'TechFlow', location: 'Remote', salary: '$120k', type: 'Full-time' },
+    { id: 2, title: 'Product Designer', company: 'CreativeMind', location: 'New York, NY', salary: '$100k', type: 'Full-time' },
+    { id: 3, title: 'Backend Engineer', company: 'DataScale', location: 'Austin, TX', salary: '$130k', type: 'Contract' },
+  ];
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
@@ -29,7 +36,6 @@ const Home = () => {
         {/* Hero Search Bar */}
         <form className="hero-search" onSubmit={handleSearch}>
           <div className="search-input-wrapper">
-            <span className="search-icon">🔍</span>
             <input 
               type="text" 
               placeholder="Job title, keywords, or company..." 
@@ -47,31 +53,30 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Jobs Preview - Updated structure and text from Code Edit */}
+      {/* Featured Jobs Preview */}
       <section className="featured-jobs">
         <div className="section-header">
-          <h2>Featured Opportunities</h2>
-          <p>Hand-picked roles from top-tier companies updated daily.</p>
-          <Link to="/jobs" className="view-all-link">View all jobs →</Link>
+          <h2 className="section-title">Featured Opportunities</h2>
+          <Link to="/jobs" className="view-all-link">View all jobs</Link>
         </div>
-
+        
         <div className="jobs-grid">
-          {featuredJobs.map((job) => (
+          {featuredJobs.map(job => (
             <div key={job.id} className="job-card-mini">
               <div className="company-logo">{job.company[0]}</div>
               <div className="job-info">
                 <h3>{job.title}</h3>
                 <p>{job.company} • {job.location}</p>
               </div>
-              <button className="apply-btn">View Role</button>
+              <Link to={`/jobs/${job.id}`} className="apply-btn">View Role</Link>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Value Proposition - Replaced "Why Choose Us" with new structure and text from Code Edit */}
+      {/* Value Proposition */}
       <section className="value-proposition">
-        <h2 className="section-title text-center">Why RecruitConnect?</h2> {/* Retained section title for consistency */}
+        <h2 className="section-title text-center">Why RecruitConnect?</h2>
         <div className="value-grid">
           <div className="value-item">
             <div className="value-content">
@@ -94,7 +99,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Final Call to Action - Updated structure and text from Code Edit */}
+      {/* Final Call to Action */}
       <section className="bottom-cta">
         <div className="cta-card">
           <h2>Ready to transform your career?</h2>
