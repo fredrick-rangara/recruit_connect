@@ -9,6 +9,7 @@ import Applications from './features/dashboard/Applications';
 import ProfileSettings from './features/dashboard/ProfileSettings';
 import EmployerDashboard from './features/employer/EmployerDashboard';
 import EmployerHome from './features/employer/EmployerHome';
+import ManageJobs from './features/employer/ManageJobs';
 import JobBoard from './features/jobs/JobBoard';
 import JobDetails from './features/jobs/JobDetails';
 import './App.css';
@@ -38,7 +39,7 @@ function App() {
             {/* Employer Workspace Nested Routes */}
             <Route path="/employer" element={<EmployerDashboard />}>
               <Route index element={<EmployerHome />} />
-              <Route path="jobs" element={<div><h1>Active Postings</h1></div>} />
+              <Route path="jobs" element={<ManageJobs />} />
               <Route path="post-job" element={<div><h1>Create a Posting</h1></div>} />
               <Route path="candidates" element={<div><h1>Talent Pool</h1></div>} />
               <Route path="settings" element={<div><h1>Company Settings</h1></div>} />
