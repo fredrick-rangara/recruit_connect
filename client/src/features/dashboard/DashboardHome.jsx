@@ -7,10 +7,10 @@ import './DashboardHome.css';
  */
 const DashboardHome = () => {
   const stats = [
-    { label: 'Total Applications', value: '12', icon: '📝', trend: '+2 this week', color: '#6c5ce7' },
-    { label: 'Profile Views', value: '45', icon: '👤', trend: '+10% from last month', color: '#00b894' },
-    { label: 'Unread Messages', value: '3', icon: '💬', trend: 'Response expected', color: '#0984e3' },
-    { label: 'Saved Jobs', value: '8', icon: '🔖', trend: '2 expiring soon', color: '#fdcb6e' },
+    { label: 'Total Applications', value: '12', trend: '+2 this week', color: '#6c5ce7' },
+    { label: 'Profile Views', value: '45', trend: '+10% from last month', color: '#00b894' },
+    { label: 'Unread Messages', value: '3', trend: 'Response expected', color: '#0984e3' },
+    { label: 'Saved Jobs', value: '8', trend: '2 expiring soon', color: '#fdcb6e' },
   ];
 
   return (
@@ -28,9 +28,6 @@ const DashboardHome = () => {
         {stats.map((stat) => (
           <div key={stat.label} className="stat-card">
             <div className="stat-header">
-              <span className="stat-icon" style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
-                {stat.icon}
-              </span>
               <span className="stat-trend">{stat.trend}</span>
             </div>
             <div className="stat-body">
@@ -45,7 +42,7 @@ const DashboardHome = () => {
       <section className="recent-activity">
         <div className="activity-card">
           <h3>Recent Activity</h3>
-          <p>You haven't applied to any jobs today. Start your search now! 🚀</p>
+          <p>You haven't applied to any jobs today. Start your search now!</p>
         </div>
       </section>
     </div>
