@@ -28,8 +28,8 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />}>
               <Route index element={<DashboardHome />} />
               <Route path="applications" element={<Applications />} />
-              <Route path="saved" element={<div><h2>Saved Jobs</h2></div>} />
-              <Route path="messages" element={<div><h2>Messages</h2></div>} />
+              <Route path="saved" element={<div className="settings-card"><h2>Saved Jobs</h2><p>You haven't saved any jobs yet.</p></div>} />
+              <Route path="messages" element={<div className="settings-card"><h2>Messages</h2><p>Your inbox is empty.</p></div>} />
               <Route path="settings" element={<ProfileSettings />} />
             </Route>
           </Routes>
