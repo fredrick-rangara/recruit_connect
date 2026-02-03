@@ -25,6 +25,7 @@
   max-width: 800px;
   background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
