@@ -47,64 +47,61 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Jobs Preview */}
+      {/* Featured Jobs Preview - Updated structure and text from Code Edit */}
       <section className="featured-jobs">
         <div className="section-header">
-          <h2 className="section-title">Featured Opportunities</h2>
+          <h2>Featured Opportunities</h2>
+          <p>Hand-picked roles from top-tier companies updated daily.</p>
           <Link to="/jobs" className="view-all-link">View all jobs →</Link>
         </div>
-        
+
         <div className="jobs-grid">
-          {[
-            { id: 1, title: 'Senior Frontend Developer', company: 'TechFlow', location: 'Remote', salary: '$120k - $150k', type: 'Full-time' },
-            { id: 2, title: 'Product Designer', company: 'CreativeMind', location: 'New York, NY', salary: '$90k - $130k', type: 'Full-time' },
-            { id: 3, title: 'Backend Engineer', company: 'DataScale', location: 'Austin, TX', salary: '$110k - $140k', type: 'Contract' },
-          ].map(job => (
-            <div key={job.id} className="job-card">
-              <div className="job-card-header">
-                <div className="company-logo-placeholder">{job.company[0]}</div>
-                <span className="job-type-tag">{job.type}</span>
+          {featuredJobs.map((job) => (
+            <div key={job.id} className="job-card-mini">
+              <div className="company-logo">{job.company[0]}</div>
+              <div className="job-info">
+                <h3>{job.title}</h3>
+                <p>{job.company} • {job.location}</p>
               </div>
-              <h3 className="job-card-title">{job.title}</h3>
-              <p className="job-card-company">{job.company}</p>
-              <div className="job-card-footer">
-                <span className="job-location">📍 {job.location}</span>
-                <span className="job-salary">{job.salary}</span>
-              </div>
-              <button className="apply-btn">Quick Apply</button>
+              <button className="apply-btn">View Role</button>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
-      <section className="why-us">
-        <h2 className="section-title text-center">Why RecruitConnect?</h2>
-        <div className="features-grid">
-          <div className="feature-item">
-            <div className="feature-icon-box">🎯</div>
-            <h3>Smart Matching</h3>
-            <p>Our algorithms connect you with the most relevant opportunities based on your unique skills.</p>
+      {/* Value Proposition - Replaced "Why Choose Us" with new structure and text from Code Edit */}
+      <section className="value-proposition">
+        <h2 className="section-title text-center">Why RecruitConnect?</h2> {/* Retained section title for consistency */}
+        <div className="value-grid">
+          <div className="value-item">
+            <div className="value-content">
+              <h3>Verified Listings</h3>
+              <p>Every single job on our platform is manually verified to ensure high quality and zero spam.</p>
+            </div>
           </div>
-          <div className="feature-item">
-            <div className="feature-icon-box">⚡</div>
-            <h3>Fast Application</h3>
-            <p>Apply to your dream jobs with just one click using our streamlined "Quick Apply" feature.</p>
+          <div className="value-item">
+            <div className="value-content">
+              <h3>Direct Access</h3>
+              <p>Skip the noise and connect directly with hiring managers at companies you love.</p>
+            </div>
           </div>
-          <div className="feature-item">
-            <div className="feature-icon-box">🛡️</div>
-            <h3>Verified Employers</h3>
-            <p>We verify every company on our platform to ensure a safe and trustworthy job search.</p>
+          <div className="value-item">
+            <div className="value-content">
+              <h3>Global Network</h3>
+              <p>Find opportunities across the globe or within your local community with ease.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Final Call to Action */}
+      {/* Final Call to Action - Updated structure and text from Code Edit */}
       <section className="bottom-cta">
-        <div className="cta-content">
-          <h2>Ready to take the next step?</h2>
-          <p>Join thousands of professionals and companies growing with RecruitConnect.</p>
-          <Link to="/signup" className="cta-btn primary">Join Now — It's Free</Link>
+        <div className="cta-card">
+          <h2>Ready to transform your career?</h2>
+          <p>Join RecruitConnect today and start reaching your full professional potential.</p>
+          <div className="cta-buttons">
+            <Link to="/signup" className="primary-cta">Get Started</Link>
+          </div>
         </div>
       </section>
     </div>
