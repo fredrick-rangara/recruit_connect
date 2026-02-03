@@ -1,0 +1,84 @@
+.employer-sidebar {
+  width: 280px;
+  background: white;
+  height: calc(100vh - 80px);
+  position: sticky;
+  top: 80px;
+  border-right: 1px solid #f1f2f6;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  margin-bottom: 2.5rem;
+  padding-left: 1rem;
+}
+
+.sidebar-header h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #b2bec3;
+  font-weight: 800;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 1.1rem 1.25rem;
+  text-decoration: none;
+  color: #636e72;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-link:hover {
+  background: #f8f9fa;
+  color: #2d3436;
+}
+
+.sidebar-link.active {
+  background: rgba(108, 92, 231, 0.08);
+  color: #6c5ce7;
+}
+
+.sidebar-bottom-action {
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+.recruit-status-card {
+  background: #2d3436;
+  padding: 1.5rem;
+  border-radius: 20px;
+  color: white;
+}
+
+.recruit-status-card h4 {
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.recruit-status-card p {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (max-width: 992px) {
+  .employer-sidebar {
+    display: none;
+  }
+}
