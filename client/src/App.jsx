@@ -6,6 +6,7 @@ import Signup from './features/auth/Signup';
 import Dashboard from './features/dashboard/Dashboard';
 import DashboardHome from './features/dashboard/DashboardHome';
 import Applications from './features/dashboard/Applications';
+import JobBoard from './features/jobs/JobBoard';
 import './App.css';
 
 function App() {
@@ -13,11 +14,12 @@ function App() {
     <Router>
       <div className="app">
         <Navbar />
-        <main className="main-content">
+        <main className="main-content-fluid">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/jobs" element={<JobBoard />} />
             
             {/* Dashboard Nested Routes */}
             <Route path="/dashboard" element={<Dashboard />}>
