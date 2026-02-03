@@ -1,0 +1,114 @@
+.employer-home {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.page-header h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #2d3436;
+  margin-bottom: 0.5rem;
+}
+
+.page-header p {
+  color: #636e72;
+  font-size: 1.1rem;
+}
+
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.employer-stat-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.employer-stat-card .stat-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b2bec3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.employer-stat-card .stat-value {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: #2d3436;
+  margin-bottom: 0.4rem;
+}
+
+.employer-stat-card .stat-trend {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.action-card {
+  background: #6c5ce7;
+  padding: 3rem;
+  border-radius: 32px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.action-card h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.action-card p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.create-job-btn, .settings-btn {
+  padding: 1rem 2.5rem;
+  background: white;
+  color: #6c5ce7;
+  border: none;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-job-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+}
+
+.action-card.secondary {
+  background: #2d3436;
+}
+
+.action-card.secondary .settings-btn {
+  background: white;
+  color: #2d3436;
+}
+
+@media (max-width: 768px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
