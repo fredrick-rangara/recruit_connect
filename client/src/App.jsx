@@ -5,10 +5,8 @@ import Login from './features/auth/Login';
 import Signup from './features/auth/Signup';
 import Dashboard from './features/dashboard/Dashboard';
 import DashboardHome from './features/dashboard/DashboardHome';
+import Applications from './features/dashboard/Applications';
 import './App.css';
-
-// Dashboard Tab Placeholders
-const Applications = () => <div><h2>My Applications</h2><p>Track your job applications here.</p></div>;
 
 function App() {
   return (
