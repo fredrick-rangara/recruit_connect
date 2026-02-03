@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout, selectIsAuthenticated, selectCurrentUser } from '../features/auth/authSlice';
+import { logout, selectIsAuthenticated, selectCurrentUser, selectCurrentRole } from '../features/auth/authSlice';
 import './Navbar.css';
 
 /**
@@ -12,6 +12,7 @@ const Navbar = () => {
   // Accessing the authentication state from Redux
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
+  const role = useSelector(selectCurrentRole);
   const dispatch = useDispatch();
 
   /**
