@@ -1,11 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Home from './features/home/Home';
 import Login from './features/auth/Login';
 import Signup from './features/auth/Signup';
 import './App.css';
-
-// Placeholder components for routing verification
-const Home = () => <div className="page-container"><h1>Welcome to RecruitConnect</h1><p>Connecting the best talent with the best opportunities.</p></div>;
 
 function App() {
   return (
