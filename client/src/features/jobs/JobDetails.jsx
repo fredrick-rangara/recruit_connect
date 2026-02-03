@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectCurrentRole } from '../auth/authSlice';
 import ApplicationForm from './ApplicationForm';
 import './JobDetails.css';
 
@@ -9,6 +11,7 @@ import './JobDetails.css';
 const JobDetails = () => {
   const { id } = useParams();
   const [showApplyForm, setShowApplyForm] = useState(false);
+  const userRole = useSelector(selectCurrentRole);
 
   // Mock data for a single job - in a real app, this would be fetched based on 'id'
   const job = {
