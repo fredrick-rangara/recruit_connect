@@ -4,36 +4,51 @@ import { useNavigate, Link } from 'react-router-dom';
 import { setCredentials } from './authSlice';
 import './Login.css';
 
+/**
+ * Login Component: Handles user authentication by taking email and password 
+ * and updating the global Redux state.
+ */
 const Login = () => {
+  // Local state for the login form inputs
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  
+  // State for handling potential errors and loading status
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  /**
+   * handleChange: Updates the local state as the user types in the form fields.
+   */
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  /**
+   * handleSubmit: Processes the login request.
+   * Currently uses a mock timeout to simulate an API request.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    // Mock login logic for now - will be replaced with API call later
     try {
+      // Mock login logic - this will be replaced with a real fetch/axios call later
       setTimeout(() => {
         if (formData.email && formData.password) {
-          // Success mock
+          // Dispatching success to the Redux store
           dispatch(setCredentials({
             user: { name: 'Demo User', email: formData.email },
             token: 'mock-jwt-token',
             role: 'job_seeker',
           }));
+          // Redirect the user to the home page after a successful login
           navigate('/');
         } else {
           setError('Invalid email or password');
@@ -52,6 +67,7 @@ const Login = () => {
         <h2 className="auth-title">Welcome Back</h2>
         <p className="auth-subtitle">Login to your RecruitConnect account</p>
         
+        {/* Render error message if it exists */}
         {error && <div className="auth-error">{error}</div>}
         
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -90,6 +106,7 @@ const Login = () => {
             <Link to="/forgot-password" title="Coming soon">Forgot password?</Link>
           </div>
           
+          {/* Submit button with loading state */}
           <button type="submit" className="auth-submit-btn" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
