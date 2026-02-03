@@ -7,11 +7,11 @@ import './Sidebar.css';
  */
 const Sidebar = () => {
   const menuItems = [
-    { name: 'Dashboard', icon: '📊', path: '/dashboard' },
-    { name: 'My Applications', icon: '📝', path: '/dashboard/applications' },
-    { name: 'Saved Jobs', icon: '🔖', path: '/dashboard/saved' },
-    { name: 'Messages', icon: '💬', path: '/dashboard/messages' },
-    { name: 'Profile Settings', icon: '⚙️', path: '/dashboard/settings' },
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'My Applications', path: '/dashboard/applications' },
+    { name: 'Saved Jobs', path: '/dashboard/saved' },
+    { name: 'Messages', path: '/dashboard/messages' },
+    { name: 'Profile Settings', path: '/dashboard/settings' },
   ];
 
   return (
@@ -27,7 +27,6 @@ const Sidebar = () => {
             className={({ isActive }) => (isActive ? 'sidebar-link active' : 'sidebar-link')}
             end
           >
-            <span className="sidebar-icon">{item.icon}</span>
             <span className="sidebar-text">{item.name}</span>
           </NavLink>
         ))}
