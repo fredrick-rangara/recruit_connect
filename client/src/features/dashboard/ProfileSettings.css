@@ -1,0 +1,156 @@
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.settings-header h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #2d3436;
+  margin-bottom: 0.5rem;
+}
+
+.settings-header p {
+  color: #636e72;
+  font-size: 1.1rem;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+}
+
+.settings-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2d3436;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-form .form-group label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 0.8rem;
+  display: block;
+}
+
+.settings-form .form-group input,
+.settings-form .form-group textarea {
+  width: 100%;
+  padding: 1.1rem;
+  border-radius: 14px;
+  border: 2px solid #f1f2f6;
+  font-size: 1rem;
+  color: #2d3436;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.settings-form .form-group input:focus,
+.settings-form .form-group textarea:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+}
+
+.disabled-input {
+  background: #f8f9fa;
+  cursor: not-allowed;
+  border-color: #dfe6e9 !important;
+}
+
+.settings-form small {
+  color: #b2bec3;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.settings-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.save-settings-btn {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-settings-btn:hover {
+  background: #5b4bc4;
+  transform: translateY(-2px);
+}
+
+.security-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.security-item:last-child {
+  border-bottom: none;
+}
+
+.security-item h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 0.3rem;
+}
+
+.security-item p {
+  font-size: 0.85rem;
+  color: #636e72;
+}
+
+.outline-btn {
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  color: #6c5ce7;
+  border: 2px solid #6c5ce7;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.outline-btn:hover {
+  background: #6c5ce7;
+  color: white;
+}
+
+@media (max-width: 1100px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
