@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './JobCard.css';
 
 /**
@@ -6,8 +7,9 @@ import './JobCard.css';
  */
 const JobCard = ({ job }) => {
   return (
-    <div className="job-card-premium">
-      <div className="job-card-top">
+    <Link to={`/jobs/${job.id}`} className="job-card-link">
+      <div className="job-card-premium">
+        <div className="job-card-top">
         <div className="company-logo-large">{job.company[0]}</div>
         <div className="job-meta">
           <span className="posted-date">2 days ago</span>
@@ -34,6 +36,7 @@ const JobCard = ({ job }) => {
         <button className="apply-now-btn">Apply Now</button>
       </div>
     </div>
+    </Link>
   );
 };
 

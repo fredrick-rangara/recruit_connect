@@ -1,3 +1,8 @@
+.job-card-link {
+  text-decoration: none;
+  display: block;
+}
+
 .job-card-premium {
   background: white;
   padding: 2rem;
