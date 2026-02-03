@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import ApplicationForm from './ApplicationForm';
 import './JobDetails.css';
 
 /**
  * JobDetails Component: Displays exhaustive information about a specific job.
- * Users can view description, requirements, and initiate the application flow.
  */
 const JobDetails = () => {
   const { id } = useParams();
+  const [showApplyForm, setShowApplyForm] = useState(false);
 
   // Mock data for a single job - in a real app, this would be fetched based on 'id'
   const job = {
@@ -104,7 +105,12 @@ const JobDetails = () => {
           <div className="apply-card">
             <h3>Interested in this role?</h3>
             <p>Apply now and take the next step in your career with {job.company}.</p>
-            <button className="apply-now-main-btn">Apply Now</button>
+            <button 
+              className="apply-now-main-btn"
+              onClick={() => setShowApplyForm(true)}
+            >
+              Apply Now
+            </button>
             <button className="save-job-btn">Save for Later</button>
           </div>
 
@@ -115,6 +121,17 @@ const JobDetails = () => {
           </div>
         </aside>
       </div>
+
+      {/* Application Modal Overlay */}
+      {showApplyForm && (
+        <div className="modal-overlay">
+          <ApplicationForm 
+            jobTitle={job.title} 
+            company={job.company} 
+            onClose={() => setShowApplyForm(false)} 
+          />
+        </div>
+      )}
     </div>
   );
 };
