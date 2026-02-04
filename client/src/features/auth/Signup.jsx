@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { setCredentials } from './authSlice';
-import './Signup.css';
+import api from '../../services/api';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: 'job_seeker', // default role
+    role: 'job_seeker' 
   });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const dispatch = useDispatch();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,130 +19,108 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    // Mock signup logic
+    setError(null);
+    setLoading(true);
     try {
-      setTimeout(() => {
-        dispatch(setCredentials({
-          user: { name: formData.name, email: formData.email },
-          token: 'mock-jwt-token',
-          role: formData.role,
-        }));
-        navigate('/');
-        setIsLoading(false);
-      }, 1000);
+      await api.post('/register', formData);
+      alert("Registration successful! Please log in.");
+      navigate('/login');
     } catch (err) {
-      setError('An error occurred during signup');
-      setIsLoading(false);
+      setError(err.response?.data?.msg || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-page">
       <div className="auth-card">
-        <h2 className="auth-title">Create Account</h2>
-        <p className="auth-subtitle">Join RecruitConnect to find your next opportunity</p>
+        <div className="auth-header" style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: '800' }}>Get Started Now</h2>
+          <p className="text-muted">Create an account to start your journey</p>
+        </div>
         
-        {error && <div className="auth-error">{error}</div>}
+        {error && (
+          <div style={{ color: '#dc3545', backgroundColor: '#f8d7da', padding: '10px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
         
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="e.g. Jane Doe"
-              value={formData.name}
-              onChange={handleChange}
-              required
+            <label>Full Name</label>
+            <input 
+              name="username" 
+              type="text" 
+              placeholder="Enter your name" 
+              required 
+              onChange={handleChange} 
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="e.g. jane@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
+            <label>Email address</label>
+            <input 
+              name="email" 
+              type="email" 
+              placeholder="jane@techcorp.com" 
+              required 
+              onChange={handleChange} 
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input 
+              name="password" 
+              type="password" 
+              placeholder="••••••••" 
+              required 
+              onChange={handleChange} 
             />
           </div>
 
           <div className="form-group">
             <label>I am a:</label>
-            <div className="role-selector">
-              <label className={`role-option ${formData.role === 'job_seeker' ? 'active' : ''}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="job_seeker"
-                  checked={formData.role === 'job_seeker'}
-                  onChange={handleChange}
-                />
-                <div className="role-icon">👤</div>
-                <div className="role-text">Job Seeker</div>
-              </label>
-              <label className={`role-option ${formData.role === 'employer' ? 'active' : ''}`}>
-                <input
-                  type="radio"
-                  name="role"
-                  value="employer"
-                  checked={formData.role === 'employer'}
-                  onChange={handleChange}
-                />
-                <div className="role-icon">💼</div>
-                <div className="role-text">Employer</div>
-              </label>
+            <div className="role-selection">
+              <button 
+                type="button" 
+                className={`role-btn ${formData.role === 'job_seeker' ? 'active' : ''}`} 
+                onClick={() => setFormData({...formData, role: 'job_seeker'})}
+              >
+                Job Seeker
+              </button>
+              <button 
+                type="button" 
+                className={`role-btn ${formData.role === 'employer' ? 'active' : ''}`} 
+                onClick={() => setFormData({...formData, role: 'employer'})}
+              >
+                Employer
+              </button>
             </div>
           </div>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <button type="submit" className="auth-submit-btn" disabled={isLoading}>
-            {isLoading ? 'Creating account...' : 'Create Account'}
+
+          <button type="submit" className="btn-purple" disabled={loading} style={{ marginTop: '10px' }}>
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
-        
-        <div className="auth-footer">
-          Already have an account? <Link to="/login">Sign In</Link>
+
+        <div className="or-divider">or</div>
+
+        <div className="social-login-container">
+          <button type="button" className="social-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
+            Google
+          </button>
+          <button type="button" className="social-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" />
+            Apple
+          </button>
         </div>
+
+        <p style={{ textAlign: 'center', marginTop: '25px', fontSize: '0.9rem' }}>
+          Already have an account? <Link to="/login" style={{ color: 'var(--figma-purple)', fontWeight: '700', textDecoration: 'none' }}>Sign In</Link>
+        </p>
       </div>
     </div>
   );
