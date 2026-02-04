@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Node
+node_modu# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Node
+node_modules/
+dist/# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+
+# OS
+.DS_Storeles/
+dist/
+
+# OS
+.DS_Store
