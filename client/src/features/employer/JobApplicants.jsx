@@ -119,4 +119,5 @@ const JobApplicants = () => {
   );
 };
 
+
 export default JobApplicants;
