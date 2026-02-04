@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { setCredentials } from './authSlice';
-import './Login.css';
+import { setCredentials } from '../../store/authSlice';
+import api from '../../services/api';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [loading, setLoading] = useState(false);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -19,85 +16,88 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
-
-    // Mock login logic for now - will be replaced with API call later
+    setLoading(true);
+    
     try {
-      setTimeout(() => {
-        if (formData.email && formData.password) {
-          // Success mock
-          dispatch(setCredentials({
-            user: { name: 'Demo User', email: formData.email },
-            token: 'mock-jwt-token',
-            role: 'job_seeker',
-          }));
-          navigate('/');
-        } else {
-          setError('Invalid email or password');
-        }
-        setIsLoading(false);
-      }, 1000);
+      const response = await api.post('/login', formData);
+      dispatch(setCredentials(response.data));
+      
+      // Navigate based on user role
+      if (response.data.role === 'employer') {
+        navigate('/employer/dashboard');
+      } else {
+        navigate('/seeker/dashboard');
+      }
     } catch (err) {
-      setError('An error occurred during login');
-      setIsLoading(false);
+      setError(err.response?.data?.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-page">
       <div className="auth-card">
-        <h2 className="auth-title">Welcome Back</h2>
-        <p className="auth-subtitle">Login to your RecruitConnect account</p>
+        <div className="auth-header" style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: '800' }}>Welcome back!</h2>
+          <p className="text-muted">Enter your credentials to access your account</p>
+        </div>
         
-        {error && <div className="auth-error">{error}</div>}
+        {error && (
+          <div style={{ color: '#dc3545', backgroundColor: '#f8d7da', padding: '10px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
         
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
+            <label>Email address</label>
+            <input 
               name="email"
-              placeholder="e.g. name@company.com"
+              type="email" 
+              placeholder="jane@techcorp.com"
               value={formData.email}
-              onChange={handleChange}
+              onChange={handleChange} 
               required
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
+            <label>Password</label>
+            <input 
               name="password"
+              type="password" 
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
-              required
+              required 
             />
           </div>
           
-          <div className="form-options">
-            <label className="checkbox-container">
-              <input type="checkbox" />
-              <span className="checkmark"></span>
-              Remember me
-            </label>
-            <Link to="/forgot-password" title="Coming soon">Forgot password?</Link>
-          </div>
-          
-          <button type="submit" className="auth-submit-btn" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign In'}
+          <button type="submit" className="btn-purple" disabled={loading} style={{ marginTop: '10px' }}>
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        
-        <div className="auth-footer">
-          Don't have an account? <Link to="/signup">Create one</Link>
+
+        <div className="or-divider">or</div>
+
+        <div className="social-login-container">
+          <button type="button" className="social-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
+            <span>Google</span>
+          </button>
+          <button type="button" className="social-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" />
+            <span>Apple</span>
+          </button>
         </div>
+
+        <p style={{ textAlign: 'center', marginTop: '25px', fontSize: '0.9rem' }}>
+          Don't have an account? <Link to="/signup" style={{ color: 'var(--figma-purple)', fontWeight: '700', textDecoration: 'none' }}>Sign up</Link>
+        </p>
       </div>
     </div>
   );
