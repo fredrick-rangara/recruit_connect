@@ -1,41 +1,61 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout, selectIsAuthenticated, selectCurrentUser } from '../features/auth/authSlice';
-import './Navbar.css';
+import { logout } from '../store/authSlice';
 
 const Navbar = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const user = useSelector(selectCurrentUser);
+  const { isAuthenticated, role } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
+    navigate('/login');
   };
 
   return (
     <nav className="navbar">
-      <div className="navbar-container">
-        <NavLink to="/" className="navbar-logo">
-          Recruit<span>Connect</span>
-        </NavLink>
-        <div className="navbar-links">
-          <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-            Home
-          </NavLink>
+      <div className="container nav-content">
+        {/* LOGO SECTION */}
+        <Link to="/" className="nav-logo">
+          💼 RecruitConnect
+        </Link>
+        
+        {/* CENTER MENU */}
+        <div className="nav-links">
+          <Link to="/">Home</Link>
+          <Link to="/jobs">Jobs</Link>
+          <Link to="/about">About Us</Link>
+          <Link to="/contact">Contact Us</Link>
+        </div>
+
+        {/* AUTH SECTION */}
+        <div className="nav-auth">
           {isAuthenticated ? (
             <>
-              <span className="nav-user">Welcome, {user?.name || 'User'}</span>
-              <button onClick={handleLogout} className="nav-btn logout-btn">Logout</button>
+              <Link 
+                to={role === 'employer' ? '/employer/dashboard' : '/seeker/dashboard'} 
+                className="nav-item-active"
+                style={{ color: 'var(--figma-purple)', fontWeight: 'bold', textDecoration: 'none' }}
+              >
+                Dashboard
+              </Link>
+              <button 
+                onClick={handleLogout} 
+                className="btn-purple" 
+                style={{ padding: '8px 20px', fontSize: '0.9rem', width: 'auto' }}
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>
-              <NavLink to="/login" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <Link to="/login" className="login-link" style={{ color: 'white', textDecoration: 'none', marginRight: '15px' }}>
                 Login
-              </NavLink>
-              <NavLink to="/signup" className="nav-btn signup-btn">
-                Get Started
-              </NavLink>
+              </Link>
+              <Link to="/signup" className="btn-purple" style={{ padding: '8px 20px', fontSize: '0.9rem', width: 'auto', textDecoration: 'none' }}>
+                Register
+              </Link>
             </>
           )}
         </div>
