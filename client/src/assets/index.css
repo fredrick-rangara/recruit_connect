@@ -138,3 +138,63 @@ body {
   align-items: center;
   margin-top: 20px;
 }
+
+/* ==========================================================
+   DASHBOARD SIDEBAR LAYOUT
+   ========================================================== */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr; /* Fixed sidebar, flexible content */
+  min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  background: var(--white);
+  border-right: 1px solid var(--border-color);
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-logo {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--figma-purple);
+  margin-bottom: 40px;
+  text-decoration: none;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-nav a {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 12px 15px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: 0.2s;
+}
+
+.sidebar-nav a:hover, 
+.sidebar-nav a.active {
+  background: var(--figma-purple-light);
+  color: var(--figma-purple);
+}
+
+/* Main Content Area */
+.dashboard-main {
+  padding: 40px;
+  background: var(--bg-gray); /* Subtle contrast from sidebar */
+  overflow-y: auto;
+}
