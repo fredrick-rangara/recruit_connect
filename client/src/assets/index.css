@@ -1,0 +1,33 @@
+/* ==========================================================
+   1. GLOBAL VARIABLES & RESET
+   ========================================================== */
+:root {
+  --figma-purple: #6f42c1;
+  --figma-purple-light: #f3e8ff;
+  --dark-bg: #111111;
+  --bg-gray: #f8f9fa;
+  --border-color: #e2e8f0;
+  --text-main: #111827;
+  --text-muted: #666666;
+  --white: #ffffff;
+}
+
+* { 
+  box-sizing: border-box; 
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--white);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
