@@ -341,3 +341,75 @@ body {
   background: var(--figma-purple-light);
   border-color: var(--figma-purple);
 }
+
+/* ==========================================================
+   HOME PAGE SEARCH & FILTERS
+   ========================================================== */
+.hero-section {
+  padding: 60px 0;
+  background-color: var(--white);
+}
+
+/* Horizontal Search Bar Layout */
+.search-bar-container {
+  display: flex;
+  background: white;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  gap: 10px;
+  max-width: 900px;
+  margin: 30px auto 0;
+  align-items: center;
+}
+
+.search-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  gap: 10px;
+  border-right: 1px solid var(--border-color);
+}
+
+.search-field:last-of-type {
+  border-right: none;
+}
+
+.search-field input {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 12px 0;
+  font-size: 1rem;
+}
+
+/* Category Pills (Fixes clumping) */
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.category-pills label {
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 1px solid var(--border-color);
+  background: white;
+  font-weight: 600;
+  transition: 0.2s all;
+}
+
+.category-pills input[type="radio"] {
+  display: none; /* Hides the actual radio circle */
+}
+
+/* Style for when the pill is selected */
+.category-pills label:has(input:checked) {
+  background-color: var(--figma-purple-light);
+  border-color: var(--figma-purple);
+  color: var(--figma-purple);
+}
