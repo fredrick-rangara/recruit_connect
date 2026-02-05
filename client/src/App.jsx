@@ -1,3 +1,9 @@
+/**
+ * Main Application Component
+ * 
+ * Handles core routing logic for both Job Seekers and Employers.
+ * Uses nested routes for dashboard management and protected workspaces.
+ */
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './features/home/Home';
