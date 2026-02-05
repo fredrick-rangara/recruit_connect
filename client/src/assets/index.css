@@ -198,3 +198,55 @@ body {
   background: var(--bg-gray); /* Subtle contrast from sidebar */
   overflow-y: auto;
 }
+
+/* ==========================================================
+   4. AUTH CARD & FORM FIXES
+   ========================================================== */
+.auth-page {
+  min-height: 90vh;
+  display: flex; align-items: center; justify-content: center; background: var(--bg-gray);
+}
+
+.auth-card {
+  background: white; padding: 40px; border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04); width: 100%; max-width: 450px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px; 
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  outline: none;
+  font-size: 1rem;
+}
+
+/* Social Buttons Row */
+.social-login-container {
+  display: flex; gap: 12px; margin-top: 20px;
+}
+
+.social-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 12px; border: 1px solid var(--border-color);
+  border-radius: 10px; background: white; cursor: pointer; font-weight: 600;
+}
+
+.social-btn img {
+  width: 20px !important; height: 20px !important; 
+}
