@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout, selectIsAuthenticated, selectCurrentUser, selectCurrentRole } from '../features/auth/authSlice';
+import { selectIsAuthenticated, selectCurrentUser, selectCurrentRole, logout } from '../features/auth/authSlice';
+import { APP_NAME } from '../constants';
 import './Navbar.css';
 
 /**
@@ -27,7 +28,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo that links back to the home page */}
         <NavLink to="/" className="navbar-logo">
-          Recruit<span>Connect</span>
+          {APP_NAME}
         </NavLink>
         
         <div className="navbar-links">
