@@ -1,0 +1,151 @@
+<parameter name="content"># Recruit Connect API Documentation
+
+## Base URL
+`http://localhost:5000/api`
+
+## Authentication
+All protected routes require JWT token in header:
+```
+Authorization: Bearer <access_token>
+```
+
+---
+
+## Auth Routes
+
+### Register
+- **Endpoint:** `POST /auth/register`
+- **Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "first_name": "John",
+  "last_name": "Doe",
+  "role": "job_seeker | employer",
+  "company_name": "Company Inc",
+  "phone": "+1234567890",
+  "resume_url": "https://...",
+  "linkedin_url": "https://..."
+}
+```
+- **Response:**
+```json
+{
+  "message": "User registered successfully",
+  "user": { ... },
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ..."
+}
+```
+
+### Login
+- **Endpoint:** `POST /auth/login`
+- **Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+
+### Refresh Token
+- **Endpoint:** `POST /auth/refresh`
+- **Header:** `Authorization: Bearer <refresh_token>`
+
+### Get Profile
+- **Endpoint:** `GET /auth/me`
+- **Auth:** Required
+
+### Update Profile
+- **Endpoint:** `PUT /auth/update-profile`
+- **Auth:** Required
+
+---
+
+## Job Routes
+
+### Get All Jobs
+- **Endpoint:** `GET /jobs`
+- **Auth:** Required
+- **Note:** Employers see only their own jobs, job seekers see all active
+
+### Get Public Jobs
+- **Endpoint:** `GET /public/jobs`
+- **Auth:** Not required
+
+### Create Job (Employer Only)
+- **Endpoint:** `POST /jobs`
+- **Body:**
+```json
+{
+  "title": "Software Engineer",
+  "description": "We are looking for...",
+  "requirements": "3+ years experience, Python",
+  "location": "New York, NY",
+  "salary_min": 80000,
+  "salary_max": 120000,
+  "job_type": "full-time",
+  "experience_level": "mid",
+  "remote_type": "hybrid",
+  "skills_required": "Python,React,PostgreSQL"
+}
+```
+
+### Update Job (Employer Only)
+- **Endpoint:** `PUT /jobs/<id>`
+
+### Delete Job (Employer Only)
+- **Endpoint:** `DELETE /jobs/<id>`
+
+### Get Job Applications (Employer Only)
+- **Endpoint:** `GET /jobs/<id>/applications`
+
+---
+
+## Application Routes
+
+### Get My Applications
+- **Endpoint:** `GET /applications`
+- **Auth:** Required
+
+### Apply to Job (Job Seeker Only)
+- **Endpoint:** `POST /applications`
+- **Body:**
+```json
+{
+  "job_id": 1,
+  "cover_letter": "I am excited to apply...",
+  "resume_url": "https://..."
+}
+```
+
+### Withdraw Application (Job Seeker Only)
+- **Endpoint:** `DELETE /applications/<id>`
+
+### Update Application Status (Employer Only)
+- **Endpoint:** `PUT /applications/<id>/status`
+- **Body:**
+```json
+{
+  "status": "reviewed | accepted | rejected",
+  "notes": "Interview scheduled..."
+}
+```
+
+---
+
+## User Roles
+- **job_seeker:** Can browse jobs, submit applications
+- **employer:** Can post jobs, manage applications
+- **admin:** Full access
+
+---
+
+## Error Response
+```json
+{
+  "error": "Error message here"
+}
+```
+</parameter>
