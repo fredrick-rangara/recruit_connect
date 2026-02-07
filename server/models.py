@@ -37,3 +37,17 @@ class Job(db.Model, SerializerMixin):
     
     # Relationship to applications
     applications = db.relationship('Application', backref='job', lazy=True, cascade="all, delete-orphan")
+
+class Application(db.Model, SerializerMixin):
+    __tablename__ = 'applications'
+    
+    serialize_rules = ('-job.applications', '-seeker.applications')
+
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    seeker_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Status and Date for Member 5's ATS logic
+    status = db.Column(db.String, default='Pending') 
+    resume_url = db.Column(db.String)
+    applied_at = db.Column(db.DateTime, default=datetime.utcnow) # Added for sorting and display
