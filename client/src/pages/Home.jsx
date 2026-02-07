@@ -29,7 +29,6 @@ const Home = () => {
 
   return (
     <div className="page-bg">
-      {/* 🏙️ Hero Header with Background Image */}
       <header className="hero-section">
         <div className="container">
           <div className="page-hero">
@@ -37,7 +36,6 @@ const Home = () => {
             <p className="text-muted">Browse thousands of jobs from top-tier companies</p>
           </div>
 
-          {/* Search Bar Container */}
           <div className="search-bar-container">
             <div className="search-field">
               <span>🔍</span>
@@ -67,7 +65,6 @@ const Home = () => {
         </div>
       </header>
 
-      {/* 🚀 MOVING LOGOS SECTION */}
       <div className="logo-marquee">
         <div className="marquee-content">
           {[1, 2].map((loop) => (
@@ -84,7 +81,6 @@ const Home = () => {
       </div>
 
       <div className="container">
-        {/* ⭐ TESTIMONIALS SECTION */}
         <section className="testimonials-section">
           <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '10px' }}>Testimonials from Our Customers</h2>
           <p className="text-muted" style={{ marginBottom: '40px' }}>Trusted by professionals and companies worldwide.</p>
@@ -114,8 +110,8 @@ const Home = () => {
 
         <hr style={{ border: '0', borderTop: '1px solid var(--border-color)', margin: '60px 0' }} />
 
-        {/* BROWSE BY CATEGORY */}
-        <section style={{ margin: '40px 0' }}>
+        {/* --- ADDED ID HERE FOR NAVIGATION --- */}
+        <section id="job-listings" style={{ scrollMarginTop: '100px', margin: '40px 0' }}>
           <h3 style={{ fontWeight: 700, marginBottom: '15px' }}>Browse by Category</h3>
           <div className="category-pills">
             {['Technology', 'Marketing', 'Design', 'Commerce'].map(cat => (
@@ -132,7 +128,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* JOB FEED */}
         <main className="job-feed" style={{ marginTop: '20px', paddingBottom: '80px' }}>
           <h3 style={{ fontWeight: 700, marginBottom: '20px' }}>Latest Opportunities</h3>
           {jobs.length > 0 ? (
