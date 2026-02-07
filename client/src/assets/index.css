@@ -506,3 +506,39 @@ body {
   font-weight: 700;
   color: var(--figma-purple);
 }
+
+/* ==========================================================
+   HERO WITH BACKGROUND IMAGE
+   ========================================================== */
+.hero-section {
+  padding: 100px 0;
+  /* Replace 'office-bg.jpg' with your actual image path or URL */
+  background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
+              url('https://example.com/your-office-image.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Optional: adds a parallax effect */
+  color: white; /* Make text white for contrast */
+}
+
+.page-hero h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 15px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.page-hero .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important; /* Lighter white for the subtitle */
+  font-size: 1.2rem;
+}
+
+/* Adjust search bar to stand out against the image */
+.search-bar-container {
+  background: white;
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  margin-top: 40px;
+}
