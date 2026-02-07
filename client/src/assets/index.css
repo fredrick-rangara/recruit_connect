@@ -603,6 +603,12 @@ html {
   transition: opacity 0.2s;
 }
 
+.btn-purple-main:disabled {
+  background: #a78bfa; /* Lighter purple */
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .btn-purple-main:hover {
   opacity: 0.9;
 }
