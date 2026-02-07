@@ -1,45 +1,38 @@
-"""
-Configuration for RecruitConnect Backend Application
-"""
 import os
+from datetime import timedelta
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
+from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
-class Config:
-    """Base configuration class"""
-    SECRET_KEY = os.getenv('SECRET_KEY', 'your-super-secret-key-change-in-production')
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
-    JWT_ACCESS_TOKEN_EXPIRES = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600))  # 1 hour
-    
-    # Database configuration
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/recruit_connect')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 300,
-    }
+app = Flask(__name__)
 
-class DevelopmentConfig(Config):
-    """Development configuration"""
-    DEBUG = True
-    ENV = 'development'
+# 1. Database Configuration
+# Supports PostgreSQL (from main) or local SQLite (from your head)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///recruitconnect.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.json.compact = False
 
-class ProductionConfig(Config):
-    """Production configuration"""
-    DEBUG = False
-    ENV = 'production'
+# 2. Security & JWT Configuration
+app.secret_key = os.getenv('SECRET_KEY', 'your-super-secret-key')
+app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY', 'super-secret-moringa-key') 
+# Using the 24-hour expiration from your version for better dev experience
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 
-# Configuration mapping
-config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'default': DevelopmentConfig
-}
+# 3. Initialize Extensions
+metadata = MetaData(naming_convention={
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+})
 
-def get_config():
-    """Get configuration based on environment"""
-    env = os.getenv('FLASK_ENV', 'development')
-    return config.get(env, config['default'])
-
+db = SQLAlchemy(app, metadata=metadata)
+migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])

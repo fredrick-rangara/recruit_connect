@@ -1,18 +1,125 @@
-import { Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import JobDetails from "./pages/JobDetails";
-import EmployerDashboard from "./pages/EmployerDashboard";
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Toaster } from 'react-hot-toast';
+
+// Common Components
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import JobDetails from './pages/JobDetails';
+
+// Auth Components
+import Login from './features/auth/Login';
+import Signup from './features/auth/Signup';
+
+// Employer Features
+import EmployerDashboard from './features/employer/EmployerDashboard';
+import PostJob from './features/employer/PostJob';
+import EditJob from './features/employer/EditJob';
+import JobApplicants from './features/employer/JobApplicants';
+
+// Seeker Features
+import SeekerDashboard from './features/seeker/SeekerDashboard';
+
+// --- UTILITY: Scroll To Top on Route Change ---
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
+// --- WRAPPER: Protected Routes ---
+const ProtectedRoute = ({ children, allowedRole }) => {
+  const { isAuthenticated, role } = useSelector((state) => state.auth);
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (allowedRole && role !== allowedRole) return <Navigate to="/" replace />;
+  
+  return children;
+};
 
 function App() {
   return (
-    <div className="App">
-      {/* This Routes component manages which page shows up based on the URL */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/job/:id" element={<JobDetails />} />
-        <Route path="/employer-dashboard" element={<EmployerDashboard />} />
-      </Routes>
-    </div>
+    <Router>
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+            background: '#333',
+            color: '#fff',
+            fontSize: '14px',
+            padding: '12px 20px',
+          },
+          success: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#7c3aed', 
+              secondary: '#fff',
+            },
+          },
+        }} 
+      />
+      
+      <ScrollToTop />
+      <Navbar />
+      
+      <main className="content-wrapper">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          {/* Note: Kept /jobs/:id and added /job/:id for compatibility with origin/main */}
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/job/:id" element={<JobDetails />} /> 
+          
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          {/* Employer Protected Routes */}
+          <Route 
+            path="/employer/dashboard" 
+            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
+          />
+          {/* Added this legacy route from main branch to point to your new dashboard */}
+          <Route 
+            path="/employer-dashboard" 
+            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
+          />
+          
+          <Route 
+            path="/employer/post-job" 
+            element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/employer/edit-job/:id" 
+            element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/employer/jobs/:jobId/applicants" 
+            element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} 
+          />
+
+          {/* Seeker Protected Routes */}
+          <Route 
+            path="/seeker/dashboard" 
+            element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} 
+          />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+
+      <Footer />
+    </Router>
   );
 }
 
