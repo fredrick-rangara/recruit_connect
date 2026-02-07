@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Removed Router import
 import { useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 
@@ -45,7 +45,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 
 function App() {
   return (
-    <Router>
+    <> {/* Used a Fragment instead of <Router> */}
       <Toaster 
         position="top-center" 
         reverseOrder={false}
@@ -74,7 +74,6 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          {/* Note: Kept /jobs/:id and added /job/:id for compatibility with origin/main */}
           <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/job/:id" element={<JobDetails />} /> 
           
@@ -88,7 +87,6 @@ function App() {
             path="/employer/dashboard" 
             element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
           />
-          {/* Added this legacy route from main branch to point to your new dashboard */}
           <Route 
             path="/employer-dashboard" 
             element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
@@ -119,7 +117,7 @@ function App() {
       </main>
 
       <Footer />
-    </Router>
+    </>
   );
 }
 

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { mockJobs } from "../data/mockJobs"; // Ensure this path is correct
+import { mockJobs } from "../data/mockJobs"; 
+import heroBg from '../assets/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg';
 
 const Home = () => {
-  // --- State for Filters ---
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
-
-  // --- Filter Logic ---
   const [jobs, setJobs] = useState(mockJobs);
 
   useEffect(() => {
@@ -30,8 +28,18 @@ const Home = () => {
   return (
     <div style={{ padding: "0", maxWidth: "100%", margin: "0 auto" }}>
       {/* --- Header Section --- */}
-      <header style={{ textAlign: "center", padding: "60px 20px", background: "var(--bg-light)" }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '20px' }}>Explore Opportunities</h1>
+      <header style={{ 
+        textAlign: "center", 
+        padding: "100px 20px", 
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${heroBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        borderBottom: '1px solid #eee'
+      }}>
+        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '20px', color: '#1e293b' }}>
+          Explore Opportunities
+        </h1>
         
         <div className="search-bar-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div className="search-field">
@@ -132,7 +140,16 @@ const Home = () => {
           <h3 style={{ fontWeight: 700, marginBottom: '20px' }}>Latest Opportunities</h3>
           {jobs.length > 0 ? (
             jobs.map((job) => (
-              <div key={job.id} className="stat-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '20px', border: '1px solid #eee', borderRadius: '12px' }}>
+              <div key={job.id} className="stat-card" style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', // Fixes vertical stretching
+                marginBottom: '16px', 
+                padding: '24px', 
+                border: '1px solid #f1f5f9', 
+                borderRadius: '16px',
+                backgroundColor: 'white'
+              }}>
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                   <div className="company-logo-placeholder">
                     {job.company ? job.company[0] : 'J'}
@@ -140,14 +157,20 @@ const Home = () => {
                   <div>
                     <h3 style={{ marginBottom: '4px', fontWeight: 700 }}>{job.title}</h3>
                     <p className="text-muted">{job.company} • {job.location}</p>
-                    <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
                       <span className="status-pill">💰 ${job.salary?.toLocaleString() || 'N/A'}</span>
-                      <span className="status-pill">🏷️ {job.category}</span>
+                      <span className="status-pill" style={{ textTransform: 'uppercase' }}>🏷️ {job.category}</span>
                     </div>
                   </div>
                 </div>
-                {/* Updated link to match the dual routes we set in App.jsx */}
-                <Link to={`/jobs/${job.id}`} className="btn-purple" style={{ textDecoration: 'none', padding: '12px 24px' }}>
+                
+                <Link to={`/jobs/${job.id}`} className="btn-purple" style={{ 
+                  textDecoration: 'none', 
+                  padding: '12px 28px',
+                  width: 'auto', // Fixes horizontal stretching
+                  minWidth: '100px',
+                  textAlign: 'center'
+                }}>
                   Details
                 </Link>
               </div>
