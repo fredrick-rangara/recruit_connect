@@ -7,7 +7,7 @@ const About = () => {
         Connecting talent with <span style={{ color: 'var(--figma-purple)' }}>opportunity</span>.
       </h1>
       <p className="subtitle" style={{ fontSize: '1.2rem', lineHeight: '1.8' }}>
-        JobConnect was founded with a simple goal: to make the hiring process transparent, efficient, and human. 
+        Recruit Connect was founded with a simple goal: to make the hiring process transparent, efficient, and human. 
         Whether you are an employer looking for your next star hire or a seeker looking for your dream role, 
         we provide the tools to make it happen.
       </p>
