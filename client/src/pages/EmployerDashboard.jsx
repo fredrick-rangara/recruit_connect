@@ -1,6 +1,12 @@
 import React from "react";
 
+/**
+ * EmployerDashboard Component
+ * This component allows employers to manage job listings and view
+ * incoming applications through an Applicant Tracking System (ATS) interface.
+ */
 const EmployerDashboard = () => {
+  // Mock data representing candidates who have applied for jobs
   const applicants = [
     {
       id: 101,
@@ -8,13 +14,19 @@ const EmployerDashboard = () => {
       job: "Frontend Developer",
       date: "2023-10-20",
     },
-    { id: 102, name: "Bob Yellow", job: "UI/UX Designer", date: "2023-10-21" },
+    {
+      id: 102,
+      name: "Bob Yellow",
+      job: "UI/UX Designer",
+      date: "2023-10-21",
+    },
   ];
 
   return (
     <div style={{ padding: "40px" }}>
       <h1>Employer Control Panel</h1>
 
+      {/* Section for creating new job opportunities */}
       <section style={{ marginBottom: "40px" }}>
         <h2>Post a Job</h2>
         <button style={{ padding: "10px 20px", cursor: "pointer" }}>
@@ -22,6 +34,7 @@ const EmployerDashboard = () => {
         </button>
       </section>
 
+      {/* Table displaying student/candidate applications */}
       <section>
         <h2>Submitted Applications (ATS)</h2>
         <table
@@ -40,6 +53,7 @@ const EmployerDashboard = () => {
             </tr>
           </thead>
           <tbody>
+            {/* Map through the applicants array to generate table rows dynamically */}
             {applicants.map((app) => (
               <tr
                 key={app.id}
