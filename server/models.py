@@ -17,3 +17,23 @@ class User(db.Model, SerializerMixin):
     # Relationships
     jobs = db.relationship('Job', backref='employer', lazy=True, cascade="all, delete-orphan")
     applications = db.relationship('Application', backref='seeker', lazy=True, cascade="all, delete-orphan")
+
+class Job(db.Model, SerializerMixin):
+    __tablename__ = 'jobs'
+    
+    serialize_rules = ('-employer.jobs', '-applications.job')
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    company = db.Column(db.String, nullable=False)
+    location = db.Column(db.String, nullable=False)
+    
+    # Figma-specific fields for filtering
+    category = db.Column(db.String) 
+    salary_max = db.Column(db.Integer)
+    
+    employer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Relationship to applications
+    applications = db.relationship('Application', backref='job', lazy=True, cascade="all, delete-orphan")
