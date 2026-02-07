@@ -1,15 +1,14 @@
-from flask import request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS 
 from config import app, db, bcrypt
 from models import User, Job, Application
 from datetime import datetime
 import os
 
 # ==========================================================
-# 0. GLOBAL CONFIGURATION (Fixes CORS Errors)
+# 0. GLOBAL CONFIGURATION
 # ==========================================================
-# This allows your Vite frontend (port 5173) to talk to this Flask server
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 # ==========================================================
@@ -41,7 +40,6 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
-        # identity must be a string for JWT Extended
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "token": access_token,
@@ -52,7 +50,7 @@ def login():
     return jsonify({"msg": "Invalid email or password"}), 401
 
 # ==========================================================
-# 2. JOB LOGIC (General & Single)
+# 2. JOB LOGIC
 # ==========================================================
 
 @app.route('/jobs', methods=['GET', 'POST'])
@@ -96,28 +94,6 @@ def get_job_by_id(id):
         return jsonify({"msg": "Job not found"}), 404
     return jsonify(job.to_dict()), 200
 
-@app.route('/jobs/<int:id>', methods=['PATCH', 'DELETE'])
-@jwt_required()
-def modify_job(id):
-    current_user_id = get_jwt_identity()
-    job = Job.query.get_or_404(id)
-
-    if str(job.employer_id) != current_user_id:
-        return jsonify({"msg": "Unauthorized"}), 403
-
-    if request.method == 'DELETE':
-        db.session.delete(job)
-        db.session.commit()
-        return jsonify({"msg": "Job deleted"}), 200
-
-    data = request.get_json()
-    job.title = data.get('title', job.title)
-    job.description = data.get('description', job.description)
-    job.location = data.get('location', job.location)
-    job.salary_max = data.get('salary_max', job.salary_max)
-    db.session.commit()
-    return jsonify(job.to_dict()), 200
-
 # ==========================================================
 # 3. APPLICATIONS & DASHBOARDS
 # ==========================================================
@@ -131,7 +107,6 @@ def apply_to_job(id):
     if user.role != 'job_seeker':
         return jsonify({"msg": "Only seekers can apply"}), 403
         
-    # Check if already applied
     existing = Application.query.filter_by(job_id=id, seeker_id=current_user_id).first()
     if existing:
         return jsonify({"msg": "Already applied to this job"}), 400
@@ -148,34 +123,36 @@ def get_employer_jobs():
     jobs = Job.query.filter_by(employer_id=current_user_id).all()
     return jsonify([j.to_dict() for j in jobs]), 200
 
-@app.route('/employer/applications', methods=['GET'])
-@jwt_required()
-def view_all_applicants():
-    current_user_id = get_jwt_identity()
-    results = db.session.query(Application, Job, User).\
-        join(Job, Application.job_id == Job.id).\
-        join(User, Application.seeker_id == User.id).\
-        filter(Job.employer_id == current_user_id).all()
+# ==========================================================
+# 4. NEW: CONTACT US LOGIC
+# ==========================================================
 
-    return jsonify([{
-        "id": app_inst.id,
-        "job_title": job_inst.title,
-        "applicant_name": user_inst.username,
-        "status": app_inst.status,
-        "date": app_inst.applied_at.strftime("%Y-%m-%d") if app_inst.applied_at else "Today"
-    } for app_inst, job_inst, user_inst in results]), 200
-
-@app.route('/applications/<int:id>', methods=['PATCH'])
-@jwt_required()
-def update_status(id):
-    application = Application.query.get_or_404(id)
+@app.route('/api/contact', methods=['POST'])
+def handle_contact():
     data = request.get_json()
-    application.status = data.get('status', application.status)
-    db.session.commit()
-    return jsonify({"msg": "Status updated"}), 200
+    
+    name = data.get('name')
+    email = data.get('email')
+    message = data.get('message')
+
+    if not name or not email or not message:
+        return jsonify({"msg": "All fields are required"}), 400
+
+    # Logic: Print to terminal for now
+    print("\n--- NEW CONTACT MESSAGE ---")
+    print(f"From: {name} ({email})")
+    print(f"Message: {message}")
+    print("---------------------------\n")
+
+    # In a real app, you would save to a 'Messages' table:
+    # new_msg = ContactMessage(name=name, email=email, message=message)
+    # db.session.add(new_msg)
+    # db.session.commit()
+
+    return jsonify({"msg": "Success! Your message was received."}), 200
 
 # ==========================================================
-# 4. MISC
+# 5. MISC
 # ==========================================================
 
 @app.route('/seeker/upload-cv', methods=['POST'])
@@ -184,7 +161,6 @@ def upload_cv():
     if 'cv' not in request.files:
         return jsonify({"msg": "No file part"}), 400
     file = request.files['cv']
-    # Add actual file saving logic here if needed
     return jsonify({"msg": f"File {file.filename} received and processed"}), 200
 
 if __name__ == '__main__':
