@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { Toaster } from 'react-hot-toast'; // 1. Import Toaster
 
 // Common Components
 import Navbar from './components/Navbar';
@@ -45,7 +46,29 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 function App() {
   return (
     <Router>
-      <ScrollToTop /> {/* Ensures users start at the top of the Job Details page */}
+      {/* 2. Add Toaster here so it's globally available */}
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+            background: '#333',
+            color: '#fff',
+            fontSize: '14px',
+            padding: '12px 20px',
+          },
+          success: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#7c3aed', // Match your purple theme
+              secondary: '#fff',
+            },
+          },
+        }} 
+      />
+      
+      <ScrollToTop />
       <Navbar />
       
       <main className="content-wrapper">
