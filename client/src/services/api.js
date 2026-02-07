@@ -1,17 +1,25 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Use your backend URL (usually 5000 or 8000)
-  baseURL: 'http://localhost:5000/api', 
+  // This must match the port in your app.py (app.run(port=5000))
+  baseURL: 'http://localhost:5000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// This adds the token to every request if the user is logged in
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// REQUEST INTERCEPTOR: Automatically attaches the JWT token to every call
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default api;
