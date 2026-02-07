@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Toaster } from 'react-hot-toast'; // 1. Import Toaster
+import { Toaster } from 'react-hot-toast';
 
 // Common Components
 import Navbar from './components/Navbar';
@@ -46,7 +46,6 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 function App() {
   return (
     <Router>
-      {/* 2. Add Toaster here so it's globally available */}
       <Toaster 
         position="top-center" 
         reverseOrder={false}
@@ -61,7 +60,7 @@ function App() {
           success: {
             duration: 4000,
             iconTheme: {
-              primary: '#7c3aed', // Match your purple theme
+              primary: '#7c3aed', 
               secondary: '#fff',
             },
           },
@@ -75,7 +74,10 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          {/* Note: Kept /jobs/:id and added /job/:id for compatibility with origin/main */}
           <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/job/:id" element={<JobDetails />} /> 
+          
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
@@ -86,6 +88,12 @@ function App() {
             path="/employer/dashboard" 
             element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
           />
+          {/* Added this legacy route from main branch to point to your new dashboard */}
+          <Route 
+            path="/employer-dashboard" 
+            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
+          />
+          
           <Route 
             path="/employer/post-job" 
             element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
