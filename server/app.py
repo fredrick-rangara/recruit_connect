@@ -1,9 +1,16 @@
 from flask import request, jsonify, make_response
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_cors import CORS  # Import CORS
 from config import app, db, bcrypt
 from models import User, Job, Application
 from datetime import datetime
 import os
+
+# ==========================================================
+# 0. GLOBAL CONFIGURATION (Fixes CORS Errors)
+# ==========================================================
+# This allows your Vite frontend (port 5173) to talk to this Flask server
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 # ==========================================================
 # 1. AUTHENTICATION
@@ -12,6 +19,9 @@ import os
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
+    if not data or not data.get('email') or not data.get('password'):
+        return jsonify({"msg": "Missing email or password"}), 400
+        
     if User.query.filter_by(email=data.get('email')).first():
         return jsonify({"msg": "User already exists"}), 400
 
@@ -31,6 +41,7 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+        # identity must be a string for JWT Extended
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "token": access_token,
@@ -147,12 +158,12 @@ def view_all_applicants():
         filter(Job.employer_id == current_user_id).all()
 
     return jsonify([{
-        "id": app.id,
-        "job_title": job.title,
-        "applicant_name": user.username,
-        "status": app.status,
-        "date": app.applied_at.strftime("%Y-%m-%d") if app.applied_at else "Today"
-    } for app, job, user in results]), 200
+        "id": app_inst.id,
+        "job_title": job_inst.title,
+        "applicant_name": user_inst.username,
+        "status": app_inst.status,
+        "date": app_inst.applied_at.strftime("%Y-%m-%d") if app_inst.applied_at else "Today"
+    } for app_inst, job_inst, user_inst in results]), 200
 
 @app.route('/applications/<int:id>', methods=['PATCH'])
 @jwt_required()
@@ -173,6 +184,7 @@ def upload_cv():
     if 'cv' not in request.files:
         return jsonify({"msg": "No file part"}), 400
     file = request.files['cv']
+    # Add actual file saving logic here if needed
     return jsonify({"msg": f"File {file.filename} received and processed"}), 200
 
 if __name__ == '__main__':
