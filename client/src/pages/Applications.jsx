@@ -28,24 +28,35 @@ const Applications = () => {
     fetchApps();
   }, [role]);
 
-  // HANDLER: PDF Preview
+  // HANDLER: PDF Preview with Error Avoidance
   const handlePreview = async (seekerId) => {
     try {
       const response = await api.get(`/download-cv/${seekerId}`, {
-        responseType: 'blob',
+        responseType: 'blob', // Critical for binary data
       });
+
+      // ERROR AVOIDANCE: Check if the returned blob is actually a PDF
+      // If the backend sends a JSON error, the type will likely be 'application/json'
+      if (response.data.type !== 'application/pdf') {
+        alert("The file on the server is not a valid PDF. Please use the Download button instead.");
+        return;
+      }
+
       const file = new Blob([response.data], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(file);
       setPreviewUrl(fileURL);
       setShowModal(true);
     } catch (err) {
-      alert("Could not load CV preview. Ensure the seeker has uploaded one.");
+      console.error("Preview failed:", err);
+      alert("Could not load CV preview. The file might be missing or corrupted.");
     }
   };
 
   const closePreview = () => {
     setShowModal(false);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl); // Clean up memory
+    }
     setPreviewUrl(null);
   };
 
@@ -55,16 +66,22 @@ const Applications = () => {
       const response = await api.get(`/download-cv/${seekerId}`, {
         responseType: 'blob',
       });
+      
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `CV_${seekerName.replace(/\s+/g, '_')}.pdf`);
+      
+      // Determine extension based on blob type for flexibility
+      const extension = response.data.type === 'application/pdf' ? 'pdf' : 'docx';
+      link.setAttribute('download', `CV_${seekerName.replace(/\s+/g, '_')}.${extension}`);
+      
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Download failed.");
+      console.error("Download failed:", err);
+      alert("Download failed. Ensure the file exists on the server.");
     }
   };
 
@@ -113,73 +130,80 @@ const Applications = () => {
             </tr>
           </thead>
           <tbody>
-            {apps.map((app) => (
-              <tr key={app.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '16px' }}>
-                  <div style={{ fontWeight: 700, color: '#1e293b' }}>
-                    {role === 'employer' ? app.seeker_name : app.job_title}
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                    {role === 'employer' ? app.seeker_email : app.company}
-                  </div>
-                </td>
-                
-                <td style={{ padding: '16px', color: '#64748b', fontSize: '0.9rem' }}>
-                  {app.created_at || new Date(app.applied_at).toLocaleDateString()}
-                </td>
+            {apps.length > 0 ? (
+              apps.map((app) => (
+                <tr key={app.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ fontWeight: 700, color: '#1e293b' }}>
+                      {role === 'employer' ? app.seeker_name : app.job_title}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      {role === 'employer' ? app.seeker_email : app.company}
+                    </div>
+                  </td>
+                  
+                  <td style={{ padding: '16px', color: '#64748b', fontSize: '0.9rem' }}>
+                    {app.created_at || new Date(app.applied_at).toLocaleDateString()}
+                  </td>
 
-                <td style={{ padding: '16px' }}>
-                  <span style={{
-                    padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700,
-                    background: getStatusStyle(app.status).bg, color: getStatusStyle(app.status).text
-                  }}>
-                    {app.status}
-                  </span>
-                </td>
+                  <td style={{ padding: '16px' }}>
+                    <span style={{
+                      padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700,
+                      background: getStatusStyle(app.status).bg, color: getStatusStyle(app.status).text
+                    }}>
+                      {app.status}
+                    </span>
+                  </td>
 
-                <td style={{ padding: '16px', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    {role === 'employer' ? (
-                      <>
+                  <td style={{ padding: '16px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      {role === 'employer' ? (
+                        <>
+                          <button 
+                            onClick={() => handlePreview(app.seeker_id)}
+                            style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #6366f1', background: 'white', color: '#6366f1', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                          >
+                            👁️ View
+                          </button>
+                          <button 
+                            onClick={() => handleDownloadCV(app.seeker_id, app.seeker_name)}
+                            style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '0.8rem' }}
+                            title="Download File"
+                          >
+                            📥
+                          </button>
+                          <button 
+                            onClick={() => updateStatus(app.id, 'Accepted')}
+                            style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#16a34a', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                          >
+                            Accept
+                          </button>
+                          <button 
+                            onClick={() => updateStatus(app.id, 'Rejected')}
+                            style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #dc2626', background: 'white', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      ) : (
                         <button 
-                          onClick={() => handlePreview(app.seeker_id)}
-                          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #6366f1', background: 'white', color: '#6366f1', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #6366f1', background: 'white', color: '#6366f1', cursor: 'pointer', fontSize: '0.8rem' }}
+                          onClick={() => navigate(`/job/${app.job_id}`)}
                         >
-                          👁️ View
+                          View Job
                         </button>
-                        <button 
-                          onClick={() => handleDownloadCV(app.seeker_id, app.seeker_name)}
-                          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '0.8rem' }}
-                          title="Download PDF"
-                        >
-                          📥
-                        </button>
-                        <button 
-                          onClick={() => updateStatus(app.id, 'Accepted')}
-                          style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#16a34a', color: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
-                        >
-                          Accept
-                        </button>
-                        <button 
-                          onClick={() => updateStatus(app.id, 'Rejected')}
-                          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #dc2626', background: 'white', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem' }}
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : (
-                      <button 
-                        className="btn-outline" 
-                        style={{ padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }}
-                        onClick={() => navigate(`/job/${app.job_id}`)}
-                      >
-                        View Job
-                      </button>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                  No applications found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
