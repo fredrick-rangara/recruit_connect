@@ -9,6 +9,7 @@ import os
 # ==========================================================
 # 0. GLOBAL CONFIGURATION
 # ==========================================================
+# Ensure CORS is configured for your React frontend (Vite default is 5173)
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 # ==========================================================
@@ -40,6 +41,7 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+        # Identity is stored as a string for JWT compatibility
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "token": access_token,
@@ -135,19 +137,16 @@ def handle_contact():
     email = data.get('email')
     message = data.get('message')
 
+    # Validation: Ensure no empty fields
     if not name or not email or not message:
         return jsonify({"msg": "All fields are required"}), 400
 
-    # Logic: Print to terminal for now
-    print("\n--- NEW CONTACT MESSAGE ---")
+    # Output to terminal for verification
+    print("\n" + "="*30)
+    print("NEW CONTACT MESSAGE RECEIVED")
     print(f"From: {name} ({email})")
     print(f"Message: {message}")
-    print("---------------------------\n")
-
-    # In a real app, you would save to a 'Messages' table:
-    # new_msg = ContactMessage(name=name, email=email, message=message)
-    # db.session.add(new_msg)
-    # db.session.commit()
+    print("="*30 + "\n")
 
     return jsonify({"msg": "Success! Your message was received."}), 200
 
