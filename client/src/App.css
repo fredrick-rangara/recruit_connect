@@ -43,3 +43,19 @@ body {
 .input-field:focus {
   border-color: #6B38FB;
 }
+
+.status-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pill.pending { background: #f1f5f9; color: #475569; }
+.status-pill.accepted { background: #dcfce7; color: #166534; }
+.status-pill.rejected { background: #fee2e2; color: #991b1b; }
+.status-pill.interviewing { background: #fef3c7; color: #92400e; }
+
+.btn-success-small { background: #22c55e; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+.btn-danger-small { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; }

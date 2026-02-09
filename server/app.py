@@ -1,22 +1,15 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS 
 from config import app, db, bcrypt
 from models import User, Job, Application
 from datetime import datetime
-from werkzeug.utils import secure_filename
 import os
 
 # ==========================================================
 # 0. GLOBAL CONFIGURATION
 # ==========================================================
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
-
-UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads/resumes')
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ==========================================================
 # 1. AUTHENTICATION
@@ -79,136 +72,110 @@ def handle_jobs():
         return jsonify([j.to_dict() for j in query.all()]), 200
 
     if request.method == 'POST':
-        try:
-            current_user_id = get_jwt_identity()
-            data = request.get_json()
-            new_job = Job(
-                title=data.get('title'),
-                description=data.get('description'),
-                company=data.get('company'),
-                location=data.get('location'),
-                category=data.get('category', 'General'),
-                salary_max=data.get('salary_max'),
-                employer_id=current_user_id
-                # Note: 'status' removed to match your current Job model
-            )
-            db.session.add(new_job)
-            db.session.commit()
-            return jsonify(new_job.to_dict()), 201
-        except Exception as e:
-            db.session.rollback()
-            print(f"ERROR POSTING JOB: {e}")
-            return jsonify({"msg": "Error creating job"}), 500
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
+        new_job = Job(
+            title=data['title'],
+            description=data['description'],
+            company=data['company'],
+            location=data['location'],
+            category=data.get('category', 'General'),
+            salary_max=data.get('salary_max'),
+            employer_id=current_user_id
+        )
+        db.session.add(new_job)
+        db.session.commit()
+        return jsonify(new_job.to_dict()), 201
+
+@app.route('/jobs/<int:id>', methods=['GET'])
+def get_job_by_id(id):
+    job = Job.query.get(id)
+    if not job:
+        return jsonify({"msg": "Job not found"}), 404
+    return jsonify(job.to_dict()), 200
 
 # ==========================================================
-# 3. PIPELINE & APPLICATIONS
+# 3. APPLICATIONS & DASHBOARDS
 # ==========================================================
-
-@app.route('/employer/dashboard-stats', methods=['GET'])
-@jwt_required()
-def get_employer_stats():
-    current_user_id = get_jwt_identity()
-    
-    # Count jobs created by this employer
-    total_jobs = Job.query.filter_by(employer_id=current_user_id).count()
-    
-    # Get all applications for this employer's jobs
-    employer_apps = Application.query.join(Job).filter(Job.employer_id == current_user_id).all()
-    
-    pipeline = {"applied": 0, "screening": 0, "interview": 0, "offered": 0, "hired": 0}
-    
-    for app_record in employer_apps:
-        status = app_record.status.lower() if app_record.status else "applied"
-        if status in pipeline:
-            pipeline[status] += 1
-
-    return jsonify({
-        "activeJobs": total_jobs,
-        "totalApplicants": len(employer_apps),
-        "pipeline": pipeline
-    }), 200
-
-@app.route('/employer/applications', methods=['GET'])
-@jwt_required()
-def get_employer_applications():
-    current_user_id = get_jwt_identity()
-    
-    # Join Application with User (Seeker) and Job for the full list
-    apps = db.session.query(Application, User, Job).join(
-        User, Application.seeker_id == User.id
-    ).join(
-        Job, Application.job_id == Job.id
-    ).filter(Job.employer_id == current_user_id).all()
-
-    results = []
-    for app_obj, seeker, job in apps:
-        results.append({
-            "id": app_obj.id,
-            "seeker_name": seeker.username,
-            "seeker_id": seeker.id,
-            "job_title": job.title,
-            "status": app_obj.status,
-            "resume_path": seeker.resume_path
-        })
-    return jsonify(results), 200
-
-@app.route('/applications/<int:app_id>/status', methods=['PATCH'])
-@jwt_required()
-def update_application_status(app_id):
-    current_user_id = get_jwt_identity()
-    data = request.get_json()
-    new_status = data.get('status').lower() # Ensure we save as lowercase
-
-    application = Application.query.get_or_404(app_id)
-    job = Job.query.get(application.job_id)
-    
-    # Security check: only the employer who owns the job can change status
-    if str(job.employer_id) != str(current_user_id):
-        return jsonify({"msg": "Unauthorized"}), 403
-
-    application.status = new_status
-    db.session.commit()
-    return jsonify({"msg": f"Status updated to {new_status}"}), 200
-
-# ==========================================================
-# 4. CV & MISC
-# ==========================================================
-
-@app.route('/download-cv/<int:seeker_id>', methods=['GET'])
-@jwt_required()
-def download_cv(seeker_id):
-    user = User.query.get_or_404(seeker_id)
-    if not user.resume_path:
-        return jsonify({"msg": "CV not found"}), 404
-    return send_from_directory(app.config['UPLOAD_FOLDER'], user.resume_path)
-
-@app.route('/seeker/upload-cv', methods=['POST'])
-@jwt_required()
-def upload_cv():
-    file = request.files.get('cv')
-    if not file or not file.filename.lower().endswith('.pdf'):
-        return jsonify({"msg": "Please upload a PDF CV"}), 400
-
-    current_user_id = get_jwt_identity()
-    filename = secure_filename(f"cv_{current_user_id}_{file.filename}")
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    
-    user = User.query.get(current_user_id)
-    user.resume_path = filename
-    db.session.commit()
-    return jsonify({"msg": "CV uploaded successfully"}), 200
 
 @app.route('/apply/<int:job_id>', methods=['POST'])
 @jwt_required()
 def apply_to_job(job_id):
     current_user_id = get_jwt_identity()
-    if Application.query.filter_by(job_id=job_id, seeker_id=current_user_id).first():
-        return jsonify({"msg": "Already applied"}), 400
+    user = User.query.get(current_user_id)
+    
+    if user.role != 'job_seeker':
+        return jsonify({"msg": "Only seekers can apply"}), 403
         
-    new_app = Application(job_id=job_id, seeker_id=current_user_id, status='applied')
+    existing = Application.query.filter_by(job_id=job_id, seeker_id=current_user_id).first()
+    if existing:
+        return jsonify({"msg": "Already applied to this job"}), 400
+
+    new_app = Application(job_id=job_id, seeker_id=current_user_id, status="Pending")
     db.session.add(new_app)
     db.session.commit()
-    return jsonify({"msg": "Applied successfully"}), 201
+    return jsonify({"msg": "Application submitted successfully"}), 201
+
+# --- SEEKER: View my applications ---
+@app.route('/seeker/my-applications', methods=['GET'])
+@jwt_required()
+def get_seeker_apps():
+    current_user_id = get_jwt_identity()
+    apps = Application.query.filter_by(seeker_id=current_user_id).all()
+    
+    # Building custom list to include Job Details
+    res = []
+    for app in apps:
+        job = Job.query.get(app.job_id)
+        res.append({
+            "id": app.id,
+            "job_id": job.id,
+            "job_title": job.title,
+            "company": job.company,
+            "status": app.status,
+            "created_at": app.created_at.strftime("%Y-%m-%d") if app.created_at else "Recent"
+        })
+    return jsonify(res), 200
+
+# --- EMPLOYER: View applicants for my jobs ---
+@app.route('/employer/applications', methods=['GET'])
+@jwt_required()
+def get_employer_apps():
+    current_user_id = get_jwt_identity()
+    # Get all jobs posted by this employer
+    employer_jobs = Job.query.filter_by(employer_id=current_user_id).all()
+    job_ids = [j.id for j in employer_jobs]
+    
+    # Find applications for those specific job IDs
+    apps = Application.query.filter(Application.job_id.in_(job_ids)).all()
+    
+    res = []
+    for app in apps:
+        seeker = User.query.get(app.seeker_id)
+        job = Job.query.get(app.job_id)
+        res.append({
+            "id": app.id,
+            "job_title": job.title,
+            "seeker_name": seeker.username, # Or seeker.name if you have that field
+            "seeker_email": seeker.email,
+            "seeker_id": seeker.id,
+            "status": app.status,
+            "created_at": app.created_at.strftime("%Y-%m-%d") if app.created_at else "Recent"
+        })
+    return jsonify(res), 200
+
+# --- GLOBAL: Update Application Status ---
+@app.route('/applications/<int:app_id>/status', methods=['PATCH'])
+@jwt_required()
+def update_app_status(app_id):
+    data = request.get_json()
+    new_status = data.get('status')
+    
+    app_record = Application.query.get_or_404(app_id)
+    app_record.status = new_status
+    db.session.commit()
+    
+    return jsonify({"msg": f"Application marked as {new_status}"}), 200
 
 @app.route('/employer/my-jobs', methods=['GET'])
 @jwt_required()
@@ -216,6 +183,34 @@ def get_employer_jobs():
     current_user_id = get_jwt_identity()
     jobs = Job.query.filter_by(employer_id=current_user_id).all()
     return jsonify([j.to_dict() for j in jobs]), 200
+
+# ==========================================================
+# 4. CONTACT US LOGIC
+# ==========================================================
+
+@app.route('/api/contact', methods=['POST'])
+def handle_contact():
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+    message = data.get('message')
+
+    if not name or not email or not message:
+        return jsonify({"msg": "All fields are required"}), 400
+
+    print(f"\n--- CONTACT: {name} ({email}) ---\n{message}\n")
+    return jsonify({"msg": "Success! Your message was received."}), 200
+
+# ==========================================================
+# 5. CV HANDLING
+# ==========================================================
+
+@app.route('/download-cv/<int:seeker_id>', methods=['GET'])
+@jwt_required()
+def download_cv(seeker_id):
+    # This is a placeholder for your file system logic
+    # In a real app: return send_from_directory(UPLOAD_FOLDER, f"cv_{seeker_id}.pdf")
+    return jsonify({"msg": "Download logic goes here"}), 200
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

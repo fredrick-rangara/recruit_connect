@@ -13,6 +13,7 @@ class ApplicationStatus:
     PENDING = 'Pending'
     ACCEPTED = 'Accepted'
     REJECTED = 'Rejected'
+    INTERVIEWING = 'Interviewing'
 
 # ==========================================================
 # 1. USER MODEL
@@ -20,6 +21,7 @@ class ApplicationStatus:
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
     
+    # Prevents password and recursion issues in JSON
     serialize_rules = ('-password_hash', '-jobs.employer', '-applications.seeker', '-applications.job')
 
     id = db.Column(db.Integer, primary_key=True)
@@ -28,12 +30,15 @@ class User(db.Model, SerializerMixin):
     password_hash = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False, default=UserRole.JOB_SEEKER)
     
+    # Profile information
     full_name = db.Column(db.String(100))
     company_name = db.Column(db.String(100))
-    resume_path = db.Column(db.String) # Added to track uploaded file name
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Relationships
+    # Employer side: jobs they have posted
     jobs = db.relationship('Job', backref='employer', lazy=True, cascade="all, delete-orphan")
+    # Seeker side: applications they have submitted
     applications = db.relationship('Application', backref='seeker', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
@@ -53,6 +58,7 @@ class Job(db.Model, SerializerMixin):
     company = db.Column(db.String, nullable=False)
     location = db.Column(db.String, nullable=False)
     
+    # Filtering & Metadata
     category = db.Column(db.String) 
     salary_max = db.Column(db.Integer)
     job_type = db.Column(db.String(50), default="Full-time")
@@ -60,8 +66,8 @@ class Job(db.Model, SerializerMixin):
     employer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Relationship to applications for this specific job
     applications = db.relationship('Application', backref='job', lazy=True, cascade="all, delete-orphan")
-    status = db.Column(db.String(20), default='active')
 
 # ==========================================================
 # 3. APPLICATION MODEL
@@ -75,20 +81,13 @@ class Application(db.Model, SerializerMixin):
     job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
     seeker_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
+    # Application State
     status = db.Column(db.String, default=ApplicationStatus.PENDING) 
     resume_url = db.Column(db.String)
+    
+    # Note: Added 'created_at' to match the attribute accessed in app.py logic
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     applied_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Added to_dict to flat-map related data for the frontend table
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "job_id": self.job_id,
-            "job_title": self.job.title if self.job else "Unknown Job",
-            "company": self.job.company if self.job else "Unknown Company",
-            "seeker_id": self.seeker_id,
-            "seeker_name": self.seeker.username if self.seeker else "Unknown Seeker",
-            "seeker_email": self.seeker.email if self.seeker else "",
-            "status": self.status,
-            "created_at": self.applied_at.strftime("%-m/%-d/%Y") # Formats date like your screenshot
-        }
+    def __repr__(self):
+        return f'<Application Seeker:{self.seeker_id} Job:{self.job_id} Status:{self.status}>'

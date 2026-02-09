@@ -1,24 +1,19 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Removed Router import
 import { useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 
 // Common Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-
-// Pages (Option B: Destination views)
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import JobDetails from './pages/JobDetails'; // Primary Job Details
-import Success from './pages/Success';
-import Applications from './pages/Applications';
+import JobDetails from './pages/JobDetails';
 
-// Features (Logic-heavy components)
+// Auth Components
 import Login from './features/auth/Login';
 import Signup from './features/auth/Signup';
-import JobList from './features/jobs/JobList'; // Corrected path from your screenshot
 
 // Employer Features
 import EmployerDashboard from './features/employer/EmployerDashboard';
@@ -50,7 +45,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 
 function App() {
   return (
-    <>
+    <> {/* Used a Fragment instead of <Router> */}
       <Toaster 
         position="top-center" 
         reverseOrder={false}
@@ -62,6 +57,13 @@ function App() {
             fontSize: '14px',
             padding: '12px 20px',
           },
+          success: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#7c3aed', 
+              secondary: '#fff',
+            },
+          },
         }} 
       />
       
@@ -72,34 +74,44 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/job/:id" element={<JobDetails />} /> 
+          
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          
-          {/* Job Search & Details */}
-          <Route path="/jobs" element={<JobList />} />
-          <Route path="/job/:id" element={<JobDetails />} />
-
-          {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/success" element={<Success />} />
 
-          {/* Employer Routes */}
-          <Route path="/employer">
-            <Route path="dashboard" element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} />
-            <Route path="post-job" element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} />
-            <Route path="edit-job/:id" element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} />
-            <Route path="jobs/:jobId/applicants" element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} />
-            <Route path="applications" element={<ProtectedRoute allowedRole="employer"><Applications /></ProtectedRoute>} />
-          </Route>
+          {/* Employer Protected Routes */}
+          <Route 
+            path="/employer/dashboard" 
+            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/employer-dashboard" 
+            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
+          />
+          
+          <Route 
+            path="/employer/post-job" 
+            element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/employer/edit-job/:id" 
+            element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} 
+          />
+          <Route 
+            path="/employer/jobs/:jobId/applicants" 
+            element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} 
+          />
 
-          {/* Seeker Routes */}
-          <Route path="/seeker">
-            <Route path="dashboard" element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} />
-            <Route path="applications" element={<ProtectedRoute allowedRole="job_seeker"><Applications /></ProtectedRoute>} />
-          </Route>
+          {/* Seeker Protected Routes */}
+          <Route 
+            path="/seeker/dashboard" 
+            element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} 
+          />
 
-          {/* Fallback */}
+          {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

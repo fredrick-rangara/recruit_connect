@@ -6,10 +6,4 @@ export const store = configureStore({
     auth: authReducer,
     // Other members will add jobsReducer here later
   },
-  // ADDITION: Disable middleware checks that cause the 902ms lag
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-      immutableCheck: false,
-    }),
 });
