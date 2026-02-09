@@ -1,0 +1,16 @@
+/* client/src/index.css */
+@import "tailwindcss";
+
+@theme {
+  /* Main brand colors from your Figma designs */
+  --color-brand-purple: #7C3AED; /* The primary action color */
+  --color-brand-dark: #111827;   /* The hero and footer background */
+  
+  /* Additional UI colors seen in your dashboards */
+  --color-ui-gray: #F9FAFB;      /* Light background for dashboard cards */
+  --color-ui-border: #E5E7EB;    /* Subtle borders for job cards */
+  
+  /* Custom border radius for that modern Figma look */
+  --radius-xl: 1rem;             /* 16px - used for dashboard widgets */
+  --radius-2xl: 1.5rem;          /* 24px - used for larger containers */
+}

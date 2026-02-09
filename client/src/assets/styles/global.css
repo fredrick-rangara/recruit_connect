@@ -1,0 +1,82 @@
+/* client/src/assets/styles/global.css */
+
+:root {
+  /* RecruitConnect Color Palette */
+  --primary: #7C3AED;       /* Purple */
+  --primary-hover: #6D28D9;
+  --dark: #111827;          /* Dark Blue/Black for Hero */
+  --light-gray: #F9FAFB;    /* Backgrounds */
+  --border: #E5E7EB;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --white: #ffffff;
+  --success: #10B981;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif; /* Standard clean UI font */
+}
+
+body {
+  background-color: var(--light-gray);
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+/* Reusable Layout Containers */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Button Styles (Matching Figma) */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Card Styles */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Input Styles */
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--primary);
+}
