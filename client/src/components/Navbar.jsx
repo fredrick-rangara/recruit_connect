@@ -30,10 +30,10 @@ const Navbar = () => {
             <HashLink smooth to="/#job-listings">Jobs</HashLink>
           ) : (
             <>
-              <Link to={role === 'employer' ? '/employer/dashboard' : '/seeker/dashboard'}>
+              {/* UPDATED: My Jobs now points to Applications */}
+              <Link to="/applications">
                 My Jobs
               </Link>
-              {/* NEW: Applications Link */}
               <Link to="/applications" style={{ position: 'relative' }}>
                 Applications
                 <span style={{
