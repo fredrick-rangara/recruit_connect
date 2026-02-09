@@ -157,11 +157,12 @@ def get_employer_applications():
 def update_application_status(app_id):
     current_user_id = get_jwt_identity()
     data = request.get_json()
-    new_status = data.get('status').lower()
+    new_status = data.get('status').lower() # Ensure we save as lowercase
 
     application = Application.query.get_or_404(app_id)
     job = Job.query.get(application.job_id)
     
+    # Security check: only the employer who owns the job can change status
     if str(job.employer_id) != str(current_user_id):
         return jsonify({"msg": "Unauthorized"}), 403
 

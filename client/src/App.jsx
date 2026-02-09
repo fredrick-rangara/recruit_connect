@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import JobDetails from './pages/JobDetails';
+import JobList from './pages/Seeker/JobList'; // Added this
 import Success from './pages/Success';
 import Applications from './pages/Applications';
 
@@ -84,9 +85,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
-          {/* Job Details (Standardized path) */}
+          {/* 1. Added the Job List Page */}
+          <Route path="/jobs" element={<JobList />} />
+
+          {/* 2. FIXED: Job Details (Standardized path) */}
+          {/* We removed the broken redirect that was sending people to the literal string ":id" */}
           <Route path="/job/:id" element={<JobDetails />} />
-          <Route path="/jobs/:id" element={<Navigate to="/job/:id" replace />} />
 
           {/* ==========================================
               EMPLOYER ROUTES (Protected)
@@ -96,7 +100,6 @@ function App() {
               path="dashboard" 
               element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
             />
-            {/* This fixes the side panel "Applications" link redirecting home */}
             <Route 
               path="applications" 
               element={<ProtectedRoute allowedRole="employer"><Applications /></ProtectedRoute>} 

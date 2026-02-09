@@ -4,22 +4,24 @@ import { useSelector } from 'react-redux';
 import api from '../../services/api';
 
 const JobDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Gets the number from the URL
   const navigate = useNavigate();
   const { isAuthenticated, role } = useSelector((state) => state.auth);
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [resume, setResume] = useState(null);
   const [applying, setApplying] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     const fetchJob = async () => {
+      // Safety check: ensure 'id' is a number and not the string ":id"
+      if (!id || id === ":id") return;
+
       try {
-        const response = await api.get(`/jobs`); 
-        const selectedJob = response.data.find(j => j.id === parseInt(id));
-        setJob(selectedJob);
+        // Hits @app.route('/jobs/<int:job_id>') in Flask
+        const response = await api.get(`/jobs/${id}`); 
+        setJob(response.data);
       } catch (err) {
         console.error("Error fetching job details", err);
       } finally {
@@ -29,108 +31,49 @@ const JobDetails = () => {
     fetchJob();
   }, [id]);
 
-  const handleApply = async (e) => {
-    e.preventDefault();
+  const handleApply = async () => {
     if (!isAuthenticated) return navigate('/login');
-    if (!resume) return setMessage({ type: 'error', text: 'Please upload your CV before applying.' });
-
+    
     setApplying(true);
-    setMessage({ type: '', text: '' });
-
     try {
-      await api.post('/applications', {
-        job_id: job.id,
-        resume_url: resume.name, 
-      });
-      setMessage({ type: 'success', text: 'Application submitted! Redirecting...' });
+      // Hits @app.route('/apply/<int:job_id>') in Flask
+      await api.post(`/apply/${id}`);
+      setMessage({ type: 'success', text: 'Application submitted!' });
       setTimeout(() => navigate('/seeker/dashboard'), 2000);
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.msg || "Application failed." });
+      setMessage({ type: 'error', text: err.response?.data?.msg || "Failed to apply." });
     } finally {
       setApplying(false);
     }
   };
 
-  if (loading) return <div className="container"><p>Loading details...</p></div>;
-  if (!job) return <div className="container"><p>Job not found.</p></div>;
+  if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading details...</div>;
+  if (!job) return <div style={{ padding: '100px', textAlign: 'center' }}>Job not found.</div>;
 
   return (
-    <div className="container job-details-page">
-      <button className="btn-back" onClick={() => navigate(-1)}>← Back to Listings</button>
-      
-      <div className="job-card-large">
-        <div className="job-header">
-          <div className="header-main">
-            <h1>{job.title}</h1>
-            <span className="status-pill interviewing">Active</span>
-          </div>
-          <div className="header-sub">
-            <span className="company-name">{job.company}</span>
-            <span className="location-tag">📍 {job.location}</span>
-          </div>
-          
-          {/* New Figma-style Metadata Tags */}
-          <div className="job-meta-tags-large">
-            <span className="meta-item">💼 {job.category || 'General'}</span>
-            <span className="meta-item">💰 Up to ${job.salary_max?.toLocaleString()}</span>
-            <span className="meta-item">🕒 Full Time</span>
-          </div>
-        </div>
-
-        <hr />
-
-        <div className="job-content-grid">
-          <div className="description-box">
-            <h3>Job Description</h3>
-            <p>{job.description}</p>
-            
-            <h3>Key Requirements</h3>
-            <ul>
-              <li>Experience in {job.category || 'related field'}.</li>
-              <li>Excellent communication and teamwork skills.</li>
-              <li>Ability to work in {job.location}.</li>
-            </ul>
-          </div>
-
-          <aside className="apply-sidebar">
-            {role === 'job_seeker' || !isAuthenticated ? (
-              <div className="apply-section-box">
-                <h3>Quick Apply</h3>
-                <p>Upload your CV to send your application to <strong>{job.company}</strong>.</p>
-                
-                <form onSubmit={handleApply}>
-                  <div className="file-upload-box">
-                    <input 
-                      type="file" 
-                      id="cv-upload"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => setResume(e.target.files[0])}
-                      hidden
-                    />
-                    <label htmlFor="cv-upload" className="file-label-modern">
-                      {resume ? `📄 ${resume.name}` : "📁 Click to upload CV"}
-                    </label>
-                  </div>
-
-                  {message.text && (
-                    <div className={`alert ${message.type}`}>
-                      {message.text}
-                    </div>
-                  )}
-
-                  <button type="submit" className="btn-apply-now" disabled={applying}>
-                    {applying ? "Submitting..." : "Apply Now"}
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div className="employer-view-note">
-                <p>You are viewing this as an <strong>Employer</strong>. You can edit this listing from your dashboard.</p>
-                <button className="btn-secondary" onClick={() => navigate('/employer/dashboard')}>Go to Dashboard</button>
-              </div>
-            )}
-          </aside>
-        </div>
+    <div className="container" style={{ padding: '40px' }}>
+      <button onClick={() => navigate(-1)}>← Back</button>
+      <div className="job-card-large" style={{ marginTop: '20px', padding: '30px', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
+        <h1>{job.title}</h1>
+        <h2>{job.company}</h2>
+        <p>{job.description}</p>
+        
+        {role === 'job_seeker' && (
+          <button 
+            onClick={handleApply} 
+            className="btn-purple" 
+            disabled={applying}
+            style={{ marginTop: '20px', width: '200px' }}
+          >
+            {applying ? "Applying..." : "Apply Now"}
+          </button>
+        )}
+        
+        {message.text && (
+          <p style={{ marginTop: '10px', color: message.type === 'success' ? 'green' : 'red' }}>
+            {message.text}
+          </p>
+        )}
       </div>
     </div>
   );
