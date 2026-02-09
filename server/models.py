@@ -61,6 +61,7 @@ class Job(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     applications = db.relationship('Application', backref='job', lazy=True, cascade="all, delete-orphan")
+    status = db.Column(db.String(20), default='active')
 
 # ==========================================================
 # 3. APPLICATION MODEL

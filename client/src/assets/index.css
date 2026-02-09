@@ -614,68 +614,93 @@ html {
 }
 
 /* ==========================================================
-   DASHBOARD UI REFINEMENT
+   DASHBOARD UI REFINEMENT (ADDITION)
    ========================================================== */
 
-/* Pipeline Layout - Fixes the vertical stacking */
+/* Fix the Hiring Pipeline - Forces horizontal alignment */
 .pipeline-container {
-  display: flex;
-  justify-content: space-between;
+  display: flex !important;
+  flex-direction: row !important; 
+  flex-wrap: nowrap !important;
+  justify-content: space-between !important;
   background: white;
-  padding: 30px;
-  border-radius: 16px;
+  padding: 25px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  margin-bottom: 40px;
 }
 
 .pipeline-stage {
-  flex: 1;
+  flex: 1 !important;
+  display: block !important;
   text-align: center;
-  border-right: 1px solid #f1f5f9;
-}
-
-.pipeline-stage:last-child {
-  border-right: none;
 }
 
 .stage-count {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  color: #6f42c1;
-  margin-bottom: 5px;
+  color: #6366f1; /* Purple accent */
+  line-height: 1;
 }
 
 .stage-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-/* Job Item Card - Fixes the purple bar look */
+/* Fix Job Item Cards - Side-by-side layout */
 .job-item-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 15px;
-  transition: transform 0.2s;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
 }
 
 .job-item-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-color: #6366f1;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
+/* Ensure buttons look like buttons, not text */
 .btn-delete {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover {
+  background: #fecaca !important;
+}
+
+/* Stats Card Styling */
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
 }
