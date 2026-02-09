@@ -8,10 +8,10 @@ bcrypt = Bcrypt()
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    full_name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), nullable=False) # 'seeker' or 'employer'
+    full_name = db.Column(db.String)
+    email = db.Column(db.String, unique=True)
+    password_hash = db.Column(db.String) # <-- Check if this is the name!
+    role = db.Column(db.String)
     
     # Relationships
     jobs_posted = db.relationship('Job', backref='employer', lazy=True)
