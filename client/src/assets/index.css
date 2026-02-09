@@ -614,56 +614,68 @@ html {
 }
 
 /* ==========================================================
-   PIPELINE STYLES
+   DASHBOARD UI REFINEMENT
    ========================================================== */
+
+/* Pipeline Layout - Fixes the vertical stacking */
 .pipeline-container {
   display: flex;
   justify-content: space-between;
   background: white;
   padding: 30px;
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
   margin-bottom: 40px;
-  position: relative;
 }
 
 .pipeline-stage {
   flex: 1;
   text-align: center;
-  position: relative;
-  z-index: 1;
+  border-right: 1px solid #f1f5f9;
 }
 
-.pipeline-stage:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 25%;
-  right: -50%;
-  width: 100%;
-  height: 2px;
-  background: var(--border-color);
-  z-index: -1;
+.pipeline-stage:last-child {
+  border-right: none;
 }
 
 .stage-count {
-  width: 45px;
-  height: 45px;
-  background: var(--figma-purple-light);
-  color: var(--figma-purple);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
+  font-size: 1.5rem;
   font-weight: 800;
-  font-size: 1.1rem;
-  border: 2px solid white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  color: #6f42c1;
+  margin-bottom: 5px;
 }
 
 .stage-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
   text-transform: uppercase;
+}
+
+/* Job Item Card - Fixes the purple bar look */
+.job-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 15px;
+  transition: transform 0.2s;
+}
+
+.job-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.btn-delete {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
 }
