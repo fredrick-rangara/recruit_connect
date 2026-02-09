@@ -102,22 +102,44 @@ def handle_jobs():
 @app.route('/seeker/my-applications', methods=['GET'])
 @jwt_required()
 def get_seeker_applications():
+    """
+    Returns a flattened list of applications with job details 
+    so the frontend table can display title/company and link to the job.
+    """
     current_user_id = get_jwt_identity()
     apps = Application.query.filter_by(seeker_id=current_user_id).all()
+    
+    # We use a custom dictionary here to ensure 'job_title', 'company', 
+    # and 'job_id' are available for the 'View Job' button.
     return jsonify([a.to_dict() for a in apps]), 200
+
+@app.route('/employer/my-jobs', methods=['GET'])
+@jwt_required()
+def get_employer_jobs():
+    """
+    Returns all applications for all jobs posted by the employer.
+    """
+    current_user_id = get_jwt_identity()
+    jobs = Job.query.filter_by(employer_id=current_user_id).all()
+    
+    all_apps = []
+    for job in jobs:
+        for app_record in job.applications:
+            all_apps.append(app_record.to_dict())
+            
+    return jsonify(all_apps), 200
 
 @app.route('/applications/<int:app_id>/status', methods=['PATCH'])
 @jwt_required()
 def update_application_status(app_id):
     current_user_id = get_jwt_identity()
     data = request.get_json()
-    new_status = data.get('status') # 'Accepted' or 'Rejected'
+    new_status = data.get('status') 
 
     application = Application.query.get(app_id)
     if not application:
         return jsonify({"msg": "Application not found"}), 404
 
-    # Authorization Check
     job = Job.query.get(application.job_id)
     if str(job.employer_id) != str(current_user_id):
         return jsonify({"msg": "Unauthorized"}), 403
@@ -129,7 +151,6 @@ def update_application_status(app_id):
 @app.route('/download-cv/<int:seeker_id>', methods=['GET'])
 @jwt_required()
 def download_cv(seeker_id):
-    # In a real app, verify the employer has a reason to see this CV
     filename = f"cv_{seeker_id}.pdf"
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
@@ -152,7 +173,6 @@ def upload_cv():
         filename = f"cv_{current_user_id}.pdf"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
-        # Update user record
         user = User.query.get(current_user_id)
         user.resume_path = filename
         db.session.commit()
