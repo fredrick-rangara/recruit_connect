@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const Applications = () => {
   const { role } = useSelector((state) => state.auth);
-  const navigate = useNavigate(); // 2. Initialize navigate
+  const navigate = useNavigate();
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +24,30 @@ const Applications = () => {
     fetchApps();
   }, [role]);
 
+  // NEW: Authenticated Download Function
+  const handleDownloadCV = async (seekerId, seekerName) => {
+    try {
+      const response = await api.get(`/download-cv/${seekerId}`, {
+        responseType: 'blob', // Important for binary data
+      });
+
+      // Create a URL for the blob and trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `CV_${seekerName.replace(/\s+/g, '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed", err);
+      alert("Failed to download CV. Ensure the seeker has uploaded one.");
+    }
+  };
+
   const updateStatus = async (appId, newStatus) => {
     try {
       await api.patch(`/applications/${appId}/status`, { status: newStatus });
@@ -39,7 +63,7 @@ const Applications = () => {
     const styles = {
       Accepted: { bg: '#dcfce7', text: '#166534' },
       Rejected: { bg: '#fee2e2', text: '#991b1b' },
-      Interviewing: { bg: '#fef3c7', text: '#92400e' }, // Added to match your screenshot
+      Interviewing: { bg: '#fef3c7', text: '#92400e' },
       Pending: { bg: '#f1f5f9', text: '#475569' }
     };
     return styles[status] || styles.Pending;
@@ -73,7 +97,6 @@ const Applications = () => {
               <tr key={app.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                 <td style={{ padding: '16px' }}>
                   <div style={{ fontWeight: 700, color: '#1e293b' }}>
-                    {/* 3. Uses keys provided by your new backend to_dict */}
                     {role === 'employer' ? app.seeker_name : app.job_title}
                   </div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
@@ -82,7 +105,6 @@ const Applications = () => {
                 </td>
                 
                 <td style={{ padding: '16px', color: '#64748b', fontSize: '0.9rem' }}>
-                  {/* 4. Uses the formatted string from backend if available, or falls back to Date object */}
                   {app.created_at || new Date(app.applied_at).toLocaleDateString()}
                 </td>
 
@@ -103,8 +125,9 @@ const Applications = () => {
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     {role === 'employer' ? (
                       <>
+                        {/* UPDATED: Uses the new download handler */}
                         <button 
-                          onClick={() => window.open(`http://localhost:5000/download-cv/${app.seeker_id}`, '_blank')}
+                          onClick={() => handleDownloadCV(app.seeker_id, app.seeker_name)}
                           style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '0.8rem' }}
                         >
                           📄 CV
@@ -137,7 +160,6 @@ const Applications = () => {
             ))}
           </tbody>
         </table>
-        {/* Empty state logic remains the same */}
       </div>
     </div>
   );
