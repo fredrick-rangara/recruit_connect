@@ -95,14 +95,54 @@ def handle_jobs():
         db.session.commit()
         return jsonify(new_job.to_dict()), 201
 
+@app.route('/jobs/<int:job_id>', methods=['DELETE'])
+@jwt_required()
+def delete_job(job_id):
+    """Deletes a job and cascades to its applications."""
+    current_user_id = get_jwt_identity()
+    job = Job.query.get(job_id)
+    
+    if not job:
+        return jsonify({"msg": "Job not found"}), 404
+        
+    if str(job.employer_id) != str(current_user_id):
+        return jsonify({"msg": "Unauthorized"}), 403
+        
+    db.session.delete(job)
+    db.session.commit()
+    return jsonify({"msg": "Job deleted successfully"}), 200
+
 # ==========================================================
-# 3. APPLICATIONS & STATUS
+# 3. APPLICATIONS & DASHBOARD STATS
 # ==========================================================
+
+@app.route('/employer/dashboard-stats', methods=['GET'])
+@jwt_required()
+def get_employer_stats():
+    """Calculates real-time stats for the employer dashboard."""
+    current_user_id = get_jwt_identity()
+    
+    # Count of jobs posted by this employer
+    active_jobs = Job.query.filter_by(employer_id=current_user_id).count()
+    
+    # Count of applications for all jobs posted by this employer
+    total_apps = db.session.query(Application).join(Job).filter(Job.employer_id == current_user_id).count()
+    
+    # Count of applications marked as 'Accepted' (interviews)
+    interviews = db.session.query(Application).join(Job).filter(
+        Job.employer_id == current_user_id, 
+        Application.status == 'Accepted'
+    ).count()
+
+    return jsonify({
+        "activeJobs": active_jobs,
+        "totalApplicants": total_apps,
+        "interviews": interviews
+    }), 200
 
 @app.route('/seeker/my-applications', methods=['GET'])
 @jwt_required()
 def get_seeker_applications():
-    """Returns applications with job title and company for the seeker dashboard table."""
     current_user_id = get_jwt_identity()
     apps = Application.query.filter_by(seeker_id=current_user_id).all()
     return jsonify([a.to_dict() for a in apps]), 200
@@ -110,7 +150,6 @@ def get_seeker_applications():
 @app.route('/employer/my-jobs', methods=['GET'])
 @jwt_required()
 def get_employer_jobs():
-    """Returns all candidates who applied to any job posted by the current employer."""
     current_user_id = get_jwt_identity()
     jobs = Job.query.filter_by(employer_id=current_user_id).all()
     
@@ -140,12 +179,14 @@ def update_application_status(app_id):
     db.session.commit()
     return jsonify({"msg": f"Application {new_status.lower()} successfully"}), 200
 
+# ==========================================================
+# 4. CV LOGIC & CONTACT
+# ==========================================================
+
 @app.route('/download-cv/<int:seeker_id>', methods=['GET'])
 @jwt_required()
 def download_cv(seeker_id):
-    """Securely fetches the seeker's CV using their database record."""
     user = User.query.get(seeker_id)
-    
     if not user or not user.resume_path:
         return jsonify({"msg": "CV not found"}), 404
         
@@ -156,11 +197,7 @@ def download_cv(seeker_id):
             as_attachment=True
         )
     except FileNotFoundError:
-        return jsonify({"msg": "File not found on server"}), 404
-
-# ==========================================================
-# 4. CV UPLOAD & CONTACT
-# ==========================================================
+        return jsonify({"msg": "File not found"}), 404
 
 @app.route('/seeker/upload-cv', methods=['POST'])
 @jwt_required()
@@ -174,14 +211,11 @@ def upload_cv():
 
     if file:
         current_user_id = get_jwt_identity()
-        # Use secure_filename to prevent directory traversal attacks
         original_filename = secure_filename(file.filename)
-        # Unique name to prevent overwriting other users' files
         unique_filename = f"cv_{current_user_id}_{original_filename}"
         
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
         
-        # Update user record in database
         user = User.query.get(current_user_id)
         user.resume_path = unique_filename
         db.session.commit()
