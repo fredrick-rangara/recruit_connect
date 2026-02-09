@@ -10,8 +10,10 @@ import os
 # ==========================================================
 # 0. GLOBAL CONFIGURATION
 # ==========================================================
+# Supports credentials for handling JWTs via standard headers
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
+# Define and create upload directory
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads/resumes')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -47,6 +49,7 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+        # Identity is stored as a string for JWT compatibility
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "token": access_token,
@@ -89,7 +92,7 @@ def handle_jobs():
             category=data.get('category', 'General'),
             salary_max=data.get('salary_max'),
             employer_id=current_user_id,
-            status='active'  # Defaulting to active for the new dashboard logic
+            status='active'  # Default status for dashboard filtering
         )
         db.session.add(new_job)
         db.session.commit()
@@ -128,7 +131,7 @@ def apply_to_job(job_id):
     new_app = Application(
         job_id=job_id,
         seeker_id=current_user_id,
-        status='applied' # Set to 'applied' to match the pipeline stage
+        status='applied' # Initial pipeline stage
     )
     db.session.add(new_app)
     db.session.commit()
@@ -139,15 +142,14 @@ def apply_to_job(job_id):
 def get_employer_stats():
     current_user_id = get_jwt_identity()
     
-    # Count active jobs
+    # Active jobs count
     active_jobs = Job.query.filter_by(employer_id=current_user_id, status='active').count()
     
-    # Join Applications with Jobs to get all apps for this employer
+    # All applications for this employer's jobs
     employer_apps = Application.query.join(Job).filter(Job.employer_id == current_user_id).all()
-    
     total_apps = len(employer_apps)
     
-    # Initialize pipeline dictionary
+    # Pipeline breakdown
     pipeline = {
         "applied": 0,
         "screening": 0,
@@ -156,15 +158,16 @@ def get_employer_stats():
         "hired": 0
     }
     
-    # Loop through apps to populate pipeline and interview counts
     interview_count = 0
     for app_record in employer_apps:
         status = app_record.status.lower() if app_record.status else "applied"
+        
+        # Categorize status for pipeline
         if status in pipeline:
             pipeline[status] += 1
         
-        # Matches frontend card for 'Interviews'
-        if status == 'interview':
+        # Specific count for 'Interviews' card (including legacy 'Accepted' status if applicable)
+        if status in ['interview', 'interviewing', 'accepted']:
             interview_count += 1
 
     return jsonify({
@@ -249,6 +252,10 @@ def upload_cv():
     user.resume_path = unique_filename
     db.session.commit()
     return jsonify({"msg": "CV uploaded successfully"}), 200
+
+# ==========================================================
+# 5. CONTACT & MISC
+# ==========================================================
 
 @app.route('/api/contact', methods=['POST'])
 def handle_contact():
