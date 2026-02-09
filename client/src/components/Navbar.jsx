@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HashLink } from 'react-router-hash-link'; // 1. Import HashLink
+import { HashLink } from 'react-router-hash-link';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
 
@@ -26,13 +26,27 @@ const Navbar = () => {
         <div className="nav-links">
           <Link to="/">Home</Link>
           
-          {/* 2. THE FIX: HashLink for scroll, Link for Dashboard */}
           {!isAuthenticated ? (
             <HashLink smooth to="/#job-listings">Jobs</HashLink>
           ) : (
-            <Link to={role === 'employer' ? '/employer/dashboard' : '/seeker/dashboard'}>
-              My Jobs
-            </Link>
+            <>
+              <Link to={role === 'employer' ? '/employer/dashboard' : '/seeker/dashboard'}>
+                My Jobs
+              </Link>
+              {/* NEW: Applications Link */}
+              <Link to="/applications" style={{ position: 'relative' }}>
+                Applications
+                <span style={{
+                  position: 'absolute',
+                  top: '-2px',
+                  right: '-8px',
+                  width: '6px',
+                  height: '6px',
+                  background: 'var(--figma-purple)',
+                  borderRadius: '50%'
+                }}></span>
+              </Link>
+            </>
           )}
           
           <Link to="/about">About Us</Link>
