@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS 
 from config import app, db, bcrypt
@@ -10,8 +10,10 @@ import os
 # ==========================================================
 # 0. GLOBAL CONFIGURATION
 # ==========================================================
+# Supports credentials for handling JWTs via standard headers
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
+# Define and create upload directory
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads/resumes')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -47,6 +49,7 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+        # Identity is stored as a string for JWT compatibility
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "token": access_token,
@@ -97,7 +100,6 @@ def handle_jobs():
 @app.route('/jobs/<int:job_id>', methods=['GET', 'DELETE'])
 @jwt_required(optional=True)
 def job_detail(job_id):
-    """GET allows anyone to view. DELETE requires ownership."""
     job = Job.query.get_or_404(job_id)
     
     if request.method == 'GET':
@@ -118,13 +120,9 @@ def job_detail(job_id):
 @app.route('/apply/<int:job_id>', methods=['POST'])
 @jwt_required()
 def apply_to_job(job_id):
-    """Handles seeker applications."""
     current_user_id = get_jwt_identity()
-    
-    # Verify job exists
     job = Job.query.get_or_404(job_id)
     
-    # Prevent duplicate applications
     existing = Application.query.filter_by(job_id=job_id, seeker_id=current_user_id).first()
     if existing:
         return jsonify({"msg": "You have already applied for this role"}), 400
@@ -191,7 +189,7 @@ def update_application_status(app_id):
     return jsonify({"msg": f"Status updated to {new_status}"}), 200
 
 # ==========================================================
-# 4. CV LOGIC & CONTACT
+# 4. CV LOGIC (PREVIEW & UPLOAD)
 # ==========================================================
 
 @app.route('/download-cv/<int:seeker_id>', methods=['GET'])
@@ -202,8 +200,8 @@ def download_cv(seeker_id):
         return jsonify({"msg": "CV not found"}), 404
         
     try:
-        # We use mimetype='application/pdf' to ensure the browser doesn't treat it as text
-        # as_attachment=False allows the browser to 'preview' it in your iframe modal.
+        # mimetype='application/pdf' fixes the "Failed to load PDF" error in iframes.
+        # as_attachment=False is required for the browser to render the file inline.
         return send_from_directory(
             app.config['UPLOAD_FOLDER'], 
             user.resume_path,
@@ -211,7 +209,7 @@ def download_cv(seeker_id):
             as_attachment=False 
         )
     except FileNotFoundError:
-        return jsonify({"msg": "File not found on server"}), 404
+        return jsonify({"msg": "File missing on server"}), 404
 
 @app.route('/seeker/upload-cv', methods=['POST'])
 @jwt_required()
@@ -222,13 +220,12 @@ def upload_cv():
     if file.filename == '':
         return jsonify({"msg": "No selected file"}), 400
 
-    # Ensure the file is actually a PDF
+    # Enforcement: Only allow PDFs to ensure the Preview Modal works.
     if not file.filename.lower().endswith('.pdf'):
-        return jsonify({"msg": "Only PDF files are allowed"}), 400
+        return jsonify({"msg": "Please upload your CV in PDF format only."}), 400
 
     current_user_id = get_jwt_identity()
     filename = secure_filename(file.filename)
-    # Using a timestamp or UUID is safer, but this works for now:
     unique_filename = f"cv_{current_user_id}_{filename}"
     
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
@@ -238,6 +235,12 @@ def upload_cv():
     user.resume_path = unique_filename
     db.session.commit()
     return jsonify({"msg": "CV uploaded successfully"}), 200
+
+@app.route('/api/contact', methods=['POST'])
+def handle_contact():
+    data = request.get_json()
+    print(f"Contact from {data.get('email')}: {data.get('message')}")
+    return jsonify({"msg": "Message received"}), 200
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
