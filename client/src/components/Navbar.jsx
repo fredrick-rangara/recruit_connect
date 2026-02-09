@@ -34,18 +34,6 @@ const Navbar = () => {
               <Link to="/applications">
                 My Jobs
               </Link>
-              <Link to="/applications" style={{ position: 'relative' }}>
-                Applications
-                <span style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-8px',
-                  width: '6px',
-                  height: '6px',
-                  background: 'var(--figma-purple)',
-                  borderRadius: '50%'
-                }}></span>
-              </Link>
             </>
           )}
           
