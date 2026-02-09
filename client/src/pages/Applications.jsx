@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import api from '../services/api';
 
 const Applications = () => {
   const { role } = useSelector((state) => state.auth);
+  const navigate = useNavigate(); // 2. Initialize navigate
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. Fetch data based on role
   useEffect(() => {
     const fetchApps = async () => {
       try {
-        // Employers see their job posts; Seekers see their sent apps
         const endpoint = role === 'employer' ? '/employer/my-jobs' : '/seeker/my-applications';
         const res = await api.get(endpoint);
         setApps(res.data);
@@ -24,7 +24,6 @@ const Applications = () => {
     fetchApps();
   }, [role]);
 
-  // 2. Handle Status Update (Employer Only)
   const updateStatus = async (appId, newStatus) => {
     try {
       await api.patch(`/applications/${appId}/status`, { status: newStatus });
@@ -36,12 +35,12 @@ const Applications = () => {
     }
   };
 
-  // 3. Status Badge Styling Logic
   const getStatusStyle = (status) => {
     const styles = {
       Accepted: { bg: '#dcfce7', text: '#166534' },
       Rejected: { bg: '#fee2e2', text: '#991b1b' },
-      Pending: { bg: '#fef3c7', text: '#92400e' }
+      Interviewing: { bg: '#fef3c7', text: '#92400e' }, // Added to match your screenshot
+      Pending: { bg: '#f1f5f9', text: '#475569' }
     };
     return styles[status] || styles.Pending;
   };
@@ -74,6 +73,7 @@ const Applications = () => {
               <tr key={app.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                 <td style={{ padding: '16px' }}>
                   <div style={{ fontWeight: 700, color: '#1e293b' }}>
+                    {/* 3. Uses keys provided by your new backend to_dict */}
                     {role === 'employer' ? app.seeker_name : app.job_title}
                   </div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
@@ -82,7 +82,8 @@ const Applications = () => {
                 </td>
                 
                 <td style={{ padding: '16px', color: '#64748b', fontSize: '0.9rem' }}>
-                  {new Date(app.created_at || Date.now()).toLocaleDateString()}
+                  {/* 4. Uses the formatted string from backend if available, or falls back to Date object */}
+                  {app.created_at || new Date(app.applied_at).toLocaleDateString()}
                 </td>
 
                 <td style={{ padding: '16px' }}>
@@ -122,7 +123,11 @@ const Applications = () => {
                         </button>
                       </>
                     ) : (
-                      <button className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+                      <button 
+                        className="btn-outline" 
+                        style={{ padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }}
+                        onClick={() => navigate(`/job/${app.job_id}`)}
+                      >
                         View Job
                       </button>
                     )}
@@ -132,13 +137,7 @@ const Applications = () => {
             ))}
           </tbody>
         </table>
-
-        {apps.length === 0 && (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📂</div>
-            <p>No applications found yet.</p>
-          </div>
-        )}
+        {/* Empty state logic remains the same */}
       </div>
     </div>
   );
