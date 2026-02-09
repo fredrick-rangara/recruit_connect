@@ -440,14 +440,14 @@ html {
    FOOTER REFINEMENT (MATCHING IMAGE)
    ========================================================== */
 .footer-main {
-  background-color: #000000; /* Pure black as seen in image */
+  background-color: #000000; /* Pure black */
   color: #ffffff;
   padding: 80px 0 40px 0;
 }
 
 .footer-grid {
   display: flex;
-  justify-content: space-between; /* Pushes brand left, links right */
+  justify-content: space-between; 
   align-items: flex-start;
   margin-bottom: 80px;
 }
@@ -494,7 +494,7 @@ html {
   border-top: 1px solid #1f2937;
   padding-top: 30px;
   display: flex;
-  justify-content: center; /* Centered as seen in image */
+  justify-content: center; 
 }
 
 .footer-legal {
@@ -504,7 +504,7 @@ html {
 
 .footer-legal a {
   color: #9ca3af;
-  text-decoration: underline; /* Matches the image style */
+  text-decoration: underline; 
   font-size: 0.85rem;
 }
 
@@ -533,7 +533,7 @@ html {
 }
 
 .contact-wrapper {
-  max-width: 800px; /* Crucial: Prevents the form from stretching full-width */
+  max-width: 800px; 
   margin: 0 auto;
 }
 
@@ -561,7 +561,7 @@ html {
 
 .contact-form label {
   display: block;
-  font-weight: 700; /* Matches your screenshot's bold labels */
+  font-weight: 700; 
   margin-bottom: 10px;
   font-size: 0.95rem;
 }
@@ -599,16 +599,71 @@ html {
   font-size: 1.1rem;
   border: none;
   cursor: pointer;
-  width: 100%; /* Makes button wide like in the image */
+  width: 100%; 
   transition: opacity 0.2s;
 }
 
 .btn-purple-main:disabled {
-  background: #a78bfa; /* Lighter purple */
+  background: #a78bfa; 
   cursor: not-allowed;
   opacity: 0.7;
 }
 
 .btn-purple-main:hover {
   opacity: 0.9;
+}
+
+/* ==========================================================
+   PIPELINE STYLES
+   ========================================================== */
+.pipeline-container {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.pipeline-stage {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.pipeline-stage:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--border-color);
+  z-index: -1;
+}
+
+.stage-count {
+  width: 45px;
+  height: 45px;
+  background: var(--figma-purple-light);
+  color: var(--figma-purple);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  border: 2px solid white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.stage-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
 }
