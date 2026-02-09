@@ -9,6 +9,10 @@ const Applications = () => {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // PREVIEW MODAL STATE
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
   useEffect(() => {
     const fetchApps = async () => {
       try {
@@ -24,27 +28,43 @@ const Applications = () => {
     fetchApps();
   }, [role]);
 
-  // NEW: Authenticated Download Function
+  // HANDLER: PDF Preview
+  const handlePreview = async (seekerId) => {
+    try {
+      const response = await api.get(`/download-cv/${seekerId}`, {
+        responseType: 'blob',
+      });
+      const file = new Blob([response.data], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+      setPreviewUrl(fileURL);
+      setShowModal(true);
+    } catch (err) {
+      alert("Could not load CV preview. Ensure the seeker has uploaded one.");
+    }
+  };
+
+  const closePreview = () => {
+    setShowModal(false);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+  };
+
+  // HANDLER: Authenticated Download
   const handleDownloadCV = async (seekerId, seekerName) => {
     try {
       const response = await api.get(`/download-cv/${seekerId}`, {
-        responseType: 'blob', // Important for binary data
+        responseType: 'blob',
       });
-
-      // Create a URL for the blob and trigger download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `CV_${seekerName.replace(/\s+/g, '_')}.pdf`);
       document.body.appendChild(link);
       link.click();
-      
-      // Cleanup
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Download failed", err);
-      alert("Failed to download CV. Ensure the seeker has uploaded one.");
+      alert("Download failed.");
     }
   };
 
@@ -110,12 +130,8 @@ const Applications = () => {
 
                 <td style={{ padding: '16px' }}>
                   <span style={{
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    background: getStatusStyle(app.status).bg,
-                    color: getStatusStyle(app.status).text
+                    padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700,
+                    background: getStatusStyle(app.status).bg, color: getStatusStyle(app.status).text
                   }}>
                     {app.status}
                   </span>
@@ -125,12 +141,18 @@ const Applications = () => {
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     {role === 'employer' ? (
                       <>
-                        {/* UPDATED: Uses the new download handler */}
+                        <button 
+                          onClick={() => handlePreview(app.seeker_id)}
+                          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #6366f1', background: 'white', color: '#6366f1', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                        >
+                          👁️ View
+                        </button>
                         <button 
                           onClick={() => handleDownloadCV(app.seeker_id, app.seeker_name)}
                           style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '0.8rem' }}
+                          title="Download PDF"
                         >
-                          📄 CV
+                          📥
                         </button>
                         <button 
                           onClick={() => updateStatus(app.id, 'Accepted')}
@@ -161,8 +183,45 @@ const Applications = () => {
           </tbody>
         </table>
       </div>
+
+      {/* MODAL OVERLAY */}
+      {showModal && (
+        <div style={modalOverlayStyle}>
+          <div style={modalContentStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#1e293b' }}>Candidate Resume</h3>
+              <button onClick={closePreview} style={closeBtnStyle}>✕ Close</button>
+            </div>
+            <iframe 
+              src={previewUrl} 
+              width="100%" 
+              height="650px" 
+              style={{ border: 'none', borderRadius: '12px', background: '#f8fafc' }}
+              title="CV Preview"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
+};
+
+// MODAL STYLES
+const modalOverlayStyle = {
+  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(15, 23, 42, 0.9)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+  zIndex: 9999, padding: '20px'
+};
+
+const modalContentStyle = {
+  backgroundColor: 'white', padding: '25px', borderRadius: '24px',
+  width: '100%', maxWidth: '1000px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+};
+
+const closeBtnStyle = {
+  background: '#fee2e2', color: '#dc2626', border: 'none',
+  padding: '10px 20px', borderRadius: '12px', cursor: 'pointer', fontWeight: '800'
 };
 
 export default Applications;
