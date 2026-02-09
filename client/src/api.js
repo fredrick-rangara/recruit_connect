@@ -1,10 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: '/api', // Vite will now prepend http://localhost:5000 automatically
 });
 
-// Automatically attach the JWT token to requests if it exists in Redux
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {

@@ -18,15 +18,19 @@ const Dashboard = () => {
 
   useEffect(() => { fetchJobs(); }, []);
 
-  const handlePostJob = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post('/jobs', newJob);
-      setIsModalOpen(false);
-      setNewJob({ title: '', location: '', salary_range: '', description: '' });
-      fetchJobs(); // Refresh the list
-    } catch (err) { alert("Failed to post job"); }
-  };
+const handlePostJob = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await api.post('/jobs', newJob);
+    console.log("Success:", response.data);
+    setIsModalOpen(false);
+    fetchJobs();
+  } catch (err) {
+    // THIS LINE IS KEY: It will show the real error in the console
+    console.log("Full Error Object:", err.response?.data); 
+    alert(err.response?.data?.msg || "Failed to post job");
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto">

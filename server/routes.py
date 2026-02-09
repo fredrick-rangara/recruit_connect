@@ -20,29 +20,33 @@ def get_jobs():
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
-# 2. Create a new job (Employer only)
 @main_bp.route('/jobs', methods=['POST'])
 @jwt_required()
 def create_job():
     data = request.get_json()
-    current_user_id = get_jwt_identity()
-    
-    # Check if the user is actually an employer
-    user = User.query.get(current_user_id)
-    if not user or user.role != 'employer':
-        return jsonify({"msg": "Unauthorized: Only employers can post jobs"}), 403
+    identity = get_jwt_identity()
 
     try:
+        user = User.query.get(int(identity))
+        
+        # Pull the company name from the user who is posting
+        # If your field is named 'full_name', use user.full_name
+        company = user.full_name 
+
         new_job = Job(
             title=data.get('title'),
+            company_name=company, # This fills the missing NOT NULL column
             description=data.get('description'),
             location=data.get('location'),
             salary_range=data.get('salary_range'),
-            employer_id=current_user_id
+            category=data.get('category', 'General'), # Default if None
+            employer_id=user.id
         )
         db.session.add(new_job)
         db.session.commit()
-        return jsonify({"msg": "Job posted successfully", "job_id": new_job.id}), 201
+        return jsonify({"msg": "Job posted successfully"}), 201
+        
     except Exception as e:
+        print(f"DATABASE ERROR: {str(e)}")
         db.session.rollback()
-        return jsonify({"msg": str(e)}), 400
+        return jsonify({"msg": "Server error processing request"}), 500

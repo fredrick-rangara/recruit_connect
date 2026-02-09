@@ -28,7 +28,10 @@ def login():
     
     if user and user.check_password(data['password']):
         # We store the role in the token so the frontend knows which dashboard to show
-        access_token = create_access_token(identity={"id": user.id, "role": user.role})
-        return jsonify(access_token=access_token, role=user.role, name=user.full_name), 200
+        access_token = create_access_token(identity=str(user.id)) # Ensure identity is the ID string
+    return jsonify({
+    "access_token": access_token,
+    "name": user.full_name, # or user.username
+    "role": user.role}), 200
     
     return jsonify({"msg": "Invalid credentials"}), 401
