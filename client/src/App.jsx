@@ -3,6 +3,7 @@ import Navbar from './components/layout/Navbar';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard'; // Ensure this exists
 import JobBoard from './pages/JobBoard';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/jobs" element={<JobBoard />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </main>
       </div>
