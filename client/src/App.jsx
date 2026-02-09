@@ -13,10 +13,13 @@ function App() {
         <main className="container mx-auto px-4 py-8">
           <Routes>
             <Route path="/" element={<h1 className="text-center text-2xl font-bold">Home</h1>} />
+          <Routes>
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/register" element={<Register />} /> {/* Ensure this matches the button path */}
             <Route path="/jobs" element={<JobBoard />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
           </Routes>
         </main>
       </div>
