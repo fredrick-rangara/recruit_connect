@@ -200,7 +200,18 @@ def download_cv(seeker_id):
     user = User.query.get_or_404(seeker_id)
     if not user.resume_path:
         return jsonify({"msg": "CV not found"}), 404
-    return send_from_directory(app.config['UPLOAD_FOLDER'], user.resume_path, as_attachment=True)
+        
+    try:
+        # We use mimetype='application/pdf' to ensure the browser doesn't treat it as text
+        # as_attachment=False allows the browser to 'preview' it in your iframe modal.
+        return send_from_directory(
+            app.config['UPLOAD_FOLDER'], 
+            user.resume_path,
+            mimetype='application/pdf',
+            as_attachment=False 
+        )
+    except FileNotFoundError:
+        return jsonify({"msg": "File not found on server"}), 404
 
 @app.route('/seeker/upload-cv', methods=['POST'])
 @jwt_required()
@@ -211,21 +222,22 @@ def upload_cv():
     if file.filename == '':
         return jsonify({"msg": "No selected file"}), 400
 
+    # Ensure the file is actually a PDF
+    if not file.filename.lower().endswith('.pdf'):
+        return jsonify({"msg": "Only PDF files are allowed"}), 400
+
     current_user_id = get_jwt_identity()
     filename = secure_filename(file.filename)
+    # Using a timestamp or UUID is safer, but this works for now:
     unique_filename = f"cv_{current_user_id}_{filename}"
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+    
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+    file.save(file_path)
     
     user = User.query.get(current_user_id)
     user.resume_path = unique_filename
     db.session.commit()
     return jsonify({"msg": "CV uploaded successfully"}), 200
-
-@app.route('/api/contact', methods=['POST'])
-def handle_contact():
-    data = request.get_json()
-    print(f"Contact from {data.get('email')}: {data.get('message')}")
-    return jsonify({"msg": "Message received"}), 200
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
