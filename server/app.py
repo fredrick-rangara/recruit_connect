@@ -10,10 +10,8 @@ import os
 # ==========================================================
 # 0. GLOBAL CONFIGURATION
 # ==========================================================
-# Supports credentials for handling JWTs via standard headers
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
-# Define and create upload directory
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads/resumes')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -49,7 +47,6 @@ def login():
     data = request.get_json()
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
-        # Identity is stored as a string for JWT compatibility
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "token": access_token,
@@ -91,7 +88,8 @@ def handle_jobs():
             location=data['location'],
             category=data.get('category', 'General'),
             salary_max=data.get('salary_max'),
-            employer_id=current_user_id
+            employer_id=current_user_id,
+            status='active'  # Defaulting to active for the new dashboard logic
         )
         db.session.add(new_job)
         db.session.commit()
@@ -130,7 +128,7 @@ def apply_to_job(job_id):
     new_app = Application(
         job_id=job_id,
         seeker_id=current_user_id,
-        status='Pending'
+        status='applied' # Set to 'applied' to match the pipeline stage
     )
     db.session.add(new_app)
     db.session.commit()
@@ -140,17 +138,40 @@ def apply_to_job(job_id):
 @jwt_required()
 def get_employer_stats():
     current_user_id = get_jwt_identity()
-    active_jobs = Job.query.filter_by(employer_id=current_user_id).count()
-    total_apps = db.session.query(Application).join(Job).filter(Job.employer_id == current_user_id).count()
-    interviews = db.session.query(Application).join(Job).filter(
-        Job.employer_id == current_user_id, 
-        Application.status.in_(['Accepted', 'Interviewing'])
-    ).count()
+    
+    # Count active jobs
+    active_jobs = Job.query.filter_by(employer_id=current_user_id, status='active').count()
+    
+    # Join Applications with Jobs to get all apps for this employer
+    employer_apps = Application.query.join(Job).filter(Job.employer_id == current_user_id).all()
+    
+    total_apps = len(employer_apps)
+    
+    # Initialize pipeline dictionary
+    pipeline = {
+        "applied": 0,
+        "screening": 0,
+        "interview": 0,
+        "offered": 0,
+        "hired": 0
+    }
+    
+    # Loop through apps to populate pipeline and interview counts
+    interview_count = 0
+    for app_record in employer_apps:
+        status = app_record.status.lower() if app_record.status else "applied"
+        if status in pipeline:
+            pipeline[status] += 1
+        
+        # Matches frontend card for 'Interviews'
+        if status == 'interview':
+            interview_count += 1
 
     return jsonify({
         "activeJobs": active_jobs,
         "totalApplicants": total_apps,
-        "interviews": interviews
+        "interviews": interview_count,
+        "pipeline": pipeline
     }), 200
 
 @app.route('/seeker/my-applications', methods=['GET'])
@@ -165,11 +186,7 @@ def get_seeker_applications():
 def get_employer_jobs():
     current_user_id = get_jwt_identity()
     jobs = Job.query.filter_by(employer_id=current_user_id).all()
-    all_apps = []
-    for job in jobs:
-        for app_record in job.applications:
-            all_apps.append(app_record.to_dict())
-    return jsonify(all_apps), 200
+    return jsonify([j.to_dict() for j in jobs]), 200
 
 @app.route('/applications/<int:app_id>/status', methods=['PATCH'])
 @jwt_required()
@@ -200,8 +217,6 @@ def download_cv(seeker_id):
         return jsonify({"msg": "CV not found"}), 404
         
     try:
-        # mimetype='application/pdf' fixes the "Failed to load PDF" error in iframes.
-        # as_attachment=False is required for the browser to render the file inline.
         return send_from_directory(
             app.config['UPLOAD_FOLDER'], 
             user.resume_path,
@@ -220,7 +235,6 @@ def upload_cv():
     if file.filename == '':
         return jsonify({"msg": "No selected file"}), 400
 
-    # Enforcement: Only allow PDFs to ensure the Preview Modal works.
     if not file.filename.lower().endswith('.pdf'):
         return jsonify({"msg": "Please upload your CV in PDF format only."}), 400
 
