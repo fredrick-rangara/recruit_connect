@@ -10,7 +10,8 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import JobDetails from './pages/JobDetails';
-import Success from './pages/Success'; // NEW IMPORT
+import Success from './pages/Success';
+import Applications from './pages/Applications'; // NEW IMPORT
 
 // Auth Components
 import Login from './features/auth/Login';
@@ -80,10 +81,20 @@ function App() {
           
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/success" element={<Success />} /> {/* NEW ROUTE */}
+          <Route path="/success" element={<Success />} />
           
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* Combined Application Tracking Route */}
+          <Route 
+            path="/applications" 
+            element={
+              <ProtectedRoute>
+                <Applications />
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Employer Protected Routes */}
           <Route 
