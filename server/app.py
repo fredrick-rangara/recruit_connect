@@ -102,23 +102,15 @@ def handle_jobs():
 @app.route('/seeker/my-applications', methods=['GET'])
 @jwt_required()
 def get_seeker_applications():
-    """
-    Returns a flattened list of applications with job details 
-    so the frontend table can display title/company and link to the job.
-    """
+    """Returns applications with job title and company for the seeker dashboard table."""
     current_user_id = get_jwt_identity()
     apps = Application.query.filter_by(seeker_id=current_user_id).all()
-    
-    # We use a custom dictionary here to ensure 'job_title', 'company', 
-    # and 'job_id' are available for the 'View Job' button.
     return jsonify([a.to_dict() for a in apps]), 200
 
 @app.route('/employer/my-jobs', methods=['GET'])
 @jwt_required()
 def get_employer_jobs():
-    """
-    Returns all applications for all jobs posted by the employer.
-    """
+    """Returns all candidates who applied to any job posted by the current employer."""
     current_user_id = get_jwt_identity()
     jobs = Job.query.filter_by(employer_id=current_user_id).all()
     
@@ -151,8 +143,20 @@ def update_application_status(app_id):
 @app.route('/download-cv/<int:seeker_id>', methods=['GET'])
 @jwt_required()
 def download_cv(seeker_id):
-    filename = f"cv_{seeker_id}.pdf"
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    """Securely fetches the seeker's CV using their database record."""
+    user = User.query.get(seeker_id)
+    
+    if not user or not user.resume_path:
+        return jsonify({"msg": "CV not found"}), 404
+        
+    try:
+        return send_from_directory(
+            app.config['UPLOAD_FOLDER'], 
+            user.resume_path,
+            as_attachment=True
+        )
+    except FileNotFoundError:
+        return jsonify({"msg": "File not found on server"}), 404
 
 # ==========================================================
 # 4. CV UPLOAD & CONTACT
@@ -170,11 +174,16 @@ def upload_cv():
 
     if file:
         current_user_id = get_jwt_identity()
-        filename = f"cv_{current_user_id}.pdf"
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # Use secure_filename to prevent directory traversal attacks
+        original_filename = secure_filename(file.filename)
+        # Unique name to prevent overwriting other users' files
+        unique_filename = f"cv_{current_user_id}_{original_filename}"
         
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+        
+        # Update user record in database
         user = User.query.get(current_user_id)
-        user.resume_path = filename
+        user.resume_path = unique_filename
         db.session.commit()
         
         return jsonify({"msg": "CV uploaded successfully!"}), 200
