@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Removed Router import
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 
@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import JobDetails from './pages/JobDetails';
+import Success from './pages/Success'; // NEW IMPORT
 
 // Auth Components
 import Login from './features/auth/Login';
@@ -45,7 +46,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 
 function App() {
   return (
-    <> {/* Used a Fragment instead of <Router> */}
+    <>
       <Toaster 
         position="top-center" 
         reverseOrder={false}
@@ -79,6 +80,8 @@ function App() {
           
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/success" element={<Success />} /> {/* NEW ROUTE */}
+          
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
