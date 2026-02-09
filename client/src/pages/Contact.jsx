@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Contact = () => {
+  const navigate = useNavigate(); // Initialize navigation
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,10 +30,11 @@ const Contact = () => {
       });
 
       if (response.ok) {
-        setStatus({ type: 'success', msg: "Message sent! We'll get back to you shortly." });
-        setFormData({ name: '', email: '', message: '' });
+        // Redirect to success page on success
+        navigate('/success');
       } else {
-        setStatus({ type: 'error', msg: "Failed to send message. Please try again." });
+        const errData = await response.json();
+        setStatus({ type: 'error', msg: errData.msg || "Failed to send message." });
       }
     } catch (error) {
       console.error("Error:", error);
@@ -50,16 +53,17 @@ const Contact = () => {
             <p style={{ color: '#64748b' }}>Have questions? We'd love to hear from you.</p>
           </header>
 
-          {status.msg && (
+          {/* Error display (Success will now redirect) */}
+          {status.type === 'error' && (
             <div style={{ 
               padding: '15px', 
               borderRadius: '10px', 
               marginBottom: '20px', 
               textAlign: 'center',
               fontWeight: '600',
-              background: status.type === 'success' ? '#f0fdf4' : '#fef2f2',
-              color: status.type === 'success' ? '#166534' : '#991b1b',
-              border: `1px solid ${status.type === 'success' ? '#bbf7d0' : '#fecaca'}`
+              background: '#fef2f2',
+              color: '#991b1b',
+              border: '1px solid #fecaca'
             }}>
               {status.msg}
             </div>
