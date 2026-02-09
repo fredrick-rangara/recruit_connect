@@ -6,17 +6,19 @@ import { Toaster } from 'react-hot-toast';
 // Common Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+
+// Pages (Option B: Destination views)
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import JobDetails from './pages/JobDetails';
-import JobList from './pages/Seeker/JobList'; // Added this
+import JobDetails from './pages/JobDetails'; // Primary Job Details
 import Success from './pages/Success';
 import Applications from './pages/Applications';
 
-// Auth Components
+// Features (Logic-heavy components)
 import Login from './features/auth/Login';
 import Signup from './features/auth/Signup';
+import JobList from './features/jobs/JobList'; // Corrected path from your screenshot
 
 // Employer Features
 import EmployerDashboard from './features/employer/EmployerDashboard';
@@ -60,13 +62,6 @@ function App() {
             fontSize: '14px',
             padding: '12px 20px',
           },
-          success: {
-            duration: 4000,
-            iconTheme: {
-              primary: '#7c3aed', 
-              secondary: '#fff',
-            },
-          },
         }} 
       />
       
@@ -75,70 +70,36 @@ function App() {
       
       <main className="content-wrapper">
         <Routes>
-          {/* ==========================================
-              PUBLIC ROUTES
-          ========================================== */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
           
-          {/* 1. Added the Job List Page */}
+          {/* Job Search & Details */}
           <Route path="/jobs" element={<JobList />} />
-
-          {/* 2. FIXED: Job Details (Standardized path) */}
-          {/* We removed the broken redirect that was sending people to the literal string ":id" */}
           <Route path="/job/:id" element={<JobDetails />} />
 
-          {/* ==========================================
-              EMPLOYER ROUTES (Protected)
-          ========================================== */}
+          {/* Auth */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/success" element={<Success />} />
+
+          {/* Employer Routes */}
           <Route path="/employer">
-            <Route 
-              path="dashboard" 
-              element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
-            />
-            <Route 
-              path="applications" 
-              element={<ProtectedRoute allowedRole="employer"><Applications /></ProtectedRoute>} 
-            />
-            <Route 
-              path="post-job" 
-              element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
-            />
-            <Route 
-              path="edit-job/:id" 
-              element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} 
-            />
-            <Route 
-              path="jobs/:jobId/applicants" 
-              element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} 
-            />
+            <Route path="dashboard" element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} />
+            <Route path="post-job" element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} />
+            <Route path="edit-job/:id" element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} />
+            <Route path="jobs/:jobId/applicants" element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} />
+            <Route path="applications" element={<ProtectedRoute allowedRole="employer"><Applications /></ProtectedRoute>} />
           </Route>
 
-          {/* ==========================================
-              SEEKER ROUTES (Protected)
-          ========================================== */}
+          {/* Seeker Routes */}
           <Route path="/seeker">
-            <Route 
-              path="dashboard" 
-              element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} 
-            />
-            <Route 
-              path="applications" 
-              element={<ProtectedRoute allowedRole="job_seeker"><Applications /></ProtectedRoute>} 
-            />
+            <Route path="dashboard" element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} />
+            <Route path="applications" element={<ProtectedRoute allowedRole="job_seeker"><Applications /></ProtectedRoute>} />
           </Route>
 
-          {/* ==========================================
-              FALLBACK & UTILITY
-          ========================================== */}
-          <Route 
-            path="/applications" 
-            element={<ProtectedRoute><Applications /></ProtectedRoute>} 
-          />
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
