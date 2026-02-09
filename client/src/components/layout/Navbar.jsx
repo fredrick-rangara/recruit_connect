@@ -15,6 +15,10 @@ const Navbar = () => {
           <span>RecruitConnect</span>
         </Link>
 
+        <Link to="/jobs" className="text-gray-600 hover:text-blue-600 font-medium">
+          Browse Jobs
+        </Link>
+
         <div className="flex items-center gap-6">
           {user ? (
             <>
