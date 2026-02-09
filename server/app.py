@@ -12,7 +12,6 @@ import os
 # ==========================================================
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
-# Configure Uploads
 UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads/resumes')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -95,43 +94,59 @@ def handle_jobs():
         db.session.commit()
         return jsonify(new_job.to_dict()), 201
 
-@app.route('/jobs/<int:job_id>', methods=['DELETE'])
-@jwt_required()
-def delete_job(job_id):
-    """Deletes a job and cascades to its applications."""
-    current_user_id = get_jwt_identity()
-    job = Job.query.get(job_id)
+@app.route('/jobs/<int:job_id>', methods=['GET', 'DELETE'])
+@jwt_required(optional=True)
+def job_detail(job_id):
+    """GET allows anyone to view. DELETE requires ownership."""
+    job = Job.query.get_or_404(job_id)
     
-    if not job:
-        return jsonify({"msg": "Job not found"}), 404
+    if request.method == 'GET':
+        return jsonify(job.to_dict()), 200
         
-    if str(job.employer_id) != str(current_user_id):
-        return jsonify({"msg": "Unauthorized"}), 403
-        
-    db.session.delete(job)
-    db.session.commit()
-    return jsonify({"msg": "Job deleted successfully"}), 200
+    if request.method == 'DELETE':
+        current_user_id = get_jwt_identity()
+        if not current_user_id or str(job.employer_id) != str(current_user_id):
+            return jsonify({"msg": "Unauthorized"}), 403
+        db.session.delete(job)
+        db.session.commit()
+        return jsonify({"msg": "Job deleted successfully"}), 200
 
 # ==========================================================
 # 3. APPLICATIONS & DASHBOARD STATS
 # ==========================================================
 
+@app.route('/apply/<int:job_id>', methods=['POST'])
+@jwt_required()
+def apply_to_job(job_id):
+    """Handles seeker applications."""
+    current_user_id = get_jwt_identity()
+    
+    # Verify job exists
+    job = Job.query.get_or_404(job_id)
+    
+    # Prevent duplicate applications
+    existing = Application.query.filter_by(job_id=job_id, seeker_id=current_user_id).first()
+    if existing:
+        return jsonify({"msg": "You have already applied for this role"}), 400
+        
+    new_app = Application(
+        job_id=job_id,
+        seeker_id=current_user_id,
+        status='Pending'
+    )
+    db.session.add(new_app)
+    db.session.commit()
+    return jsonify({"msg": "Application submitted successfully"}), 201
+
 @app.route('/employer/dashboard-stats', methods=['GET'])
 @jwt_required()
 def get_employer_stats():
-    """Calculates real-time stats for the employer dashboard."""
     current_user_id = get_jwt_identity()
-    
-    # Count of jobs posted by this employer
     active_jobs = Job.query.filter_by(employer_id=current_user_id).count()
-    
-    # Count of applications for all jobs posted by this employer
     total_apps = db.session.query(Application).join(Job).filter(Job.employer_id == current_user_id).count()
-    
-    # Count of applications marked as 'Accepted' (interviews)
     interviews = db.session.query(Application).join(Job).filter(
         Job.employer_id == current_user_id, 
-        Application.status == 'Accepted'
+        Application.status.in_(['Accepted', 'Interviewing'])
     ).count()
 
     return jsonify({
@@ -152,12 +167,10 @@ def get_seeker_applications():
 def get_employer_jobs():
     current_user_id = get_jwt_identity()
     jobs = Job.query.filter_by(employer_id=current_user_id).all()
-    
     all_apps = []
     for job in jobs:
         for app_record in job.applications:
             all_apps.append(app_record.to_dict())
-            
     return jsonify(all_apps), 200
 
 @app.route('/applications/<int:app_id>/status', methods=['PATCH'])
@@ -167,17 +180,15 @@ def update_application_status(app_id):
     data = request.get_json()
     new_status = data.get('status') 
 
-    application = Application.query.get(app_id)
-    if not application:
-        return jsonify({"msg": "Application not found"}), 404
-
+    application = Application.query.get_or_404(app_id)
     job = Job.query.get(application.job_id)
+    
     if str(job.employer_id) != str(current_user_id):
         return jsonify({"msg": "Unauthorized"}), 403
 
     application.status = new_status
     db.session.commit()
-    return jsonify({"msg": f"Application {new_status.lower()} successfully"}), 200
+    return jsonify({"msg": f"Status updated to {new_status}"}), 200
 
 # ==========================================================
 # 4. CV LOGIC & CONTACT
@@ -186,50 +197,35 @@ def update_application_status(app_id):
 @app.route('/download-cv/<int:seeker_id>', methods=['GET'])
 @jwt_required()
 def download_cv(seeker_id):
-    user = User.query.get(seeker_id)
-    if not user or not user.resume_path:
+    user = User.query.get_or_404(seeker_id)
+    if not user.resume_path:
         return jsonify({"msg": "CV not found"}), 404
-        
-    try:
-        return send_from_directory(
-            app.config['UPLOAD_FOLDER'], 
-            user.resume_path,
-            as_attachment=True
-        )
-    except FileNotFoundError:
-        return jsonify({"msg": "File not found"}), 404
+    return send_from_directory(app.config['UPLOAD_FOLDER'], user.resume_path, as_attachment=True)
 
 @app.route('/seeker/upload-cv', methods=['POST'])
 @jwt_required()
 def upload_cv():
     if 'cv' not in request.files:
         return jsonify({"msg": "No file part"}), 400
-    
     file = request.files['cv']
     if file.filename == '':
         return jsonify({"msg": "No selected file"}), 400
 
-    if file:
-        current_user_id = get_jwt_identity()
-        original_filename = secure_filename(file.filename)
-        unique_filename = f"cv_{current_user_id}_{original_filename}"
-        
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
-        
-        user = User.query.get(current_user_id)
-        user.resume_path = unique_filename
-        db.session.commit()
-        
-        return jsonify({"msg": "CV uploaded successfully!"}), 200
+    current_user_id = get_jwt_identity()
+    filename = secure_filename(file.filename)
+    unique_filename = f"cv_{current_user_id}_{filename}"
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+    
+    user = User.query.get(current_user_id)
+    user.resume_path = unique_filename
+    db.session.commit()
+    return jsonify({"msg": "CV uploaded successfully"}), 200
 
 @app.route('/api/contact', methods=['POST'])
 def handle_contact():
     data = request.get_json()
-    if not data.get('name') or not data.get('email') or not data.get('message'):
-        return jsonify({"msg": "All fields are required"}), 400
-    
-    print(f"\nMESSAGE FROM {data['name']}: {data['message']}\n")
-    return jsonify({"msg": "Success! Your message was received."}), 200
+    print(f"Contact from {data.get('email')}: {data.get('message')}")
+    return jsonify({"msg": "Message received"}), 200
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
