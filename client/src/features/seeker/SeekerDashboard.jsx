@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux'; // Added import
 import api from '../../services/api';
 
 const SeekerDashboard = () => {
+  const { username } = useSelector((state) => state.auth); // Grab username from state
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -43,7 +45,6 @@ const SeekerDashboard = () => {
           <NavLink to="/jobs">
             🔍 Search Jobs
           </NavLink>
-          {/* UPDATED: Points to the new global applications route */}
           <NavLink to="/applications">
             📂 My Applications
           </NavLink>
@@ -53,7 +54,10 @@ const SeekerDashboard = () => {
       {/* MAIN CONTENT */}
       <main className="dashboard-main">
         <header style={{ marginBottom: '30px' }}>
-          <h1 style={{ fontWeight: 800, color: '#1e293b' }}>Welcome back, Seeker!</h1>
+          {/* UPDATED: Personalized greeting */}
+          <h1 style={{ fontWeight: 800, color: '#1e293b' }}>
+            Welcome back, {username || 'Seeker'}!
+          </h1>
           <p style={{ color: '#64748b' }}>Track your applications and update your profile.</p>
         </header>
 
