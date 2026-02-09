@@ -4,23 +4,23 @@ import { NavLink, Link } from 'react-router-dom';
 import api from '../../services/api';
 
 const EmployerDashboard = () => {
-  // Use 'username' from auth state for the personalized greeting
   const { user } = useSelector((state) => state.auth);
   const [myJobs, setMyJobs] = useState([]);
   const [stats, setStats] = useState({ activeJobs: 0, totalApplicants: 0, interviews: 0 });
   const [loading, setLoading] = useState(true);
 
-  // 1. Fetch both Job Listings and Dashboard Statistics
   const fetchDashboardData = async () => {
     try {
+      // Note: Endpoint '/employer/my-jobs' from your app.py is more efficient 
+      // than fetching all jobs and filtering locally.
       const [jobsRes, statsRes] = await Promise.all([
-        api.get('/jobs'), // Assuming this returns jobs filtered for employer in production
+        api.get('/employer/my-jobs'), 
         api.get('/employer/dashboard-stats')
       ]);
       
-      // Filter jobs locally if the endpoint doesn't support employer-only filtering yet
-      const employerJobs = jobsRes.data.filter(j => String(j.employer_id) === String(user?.user_id));
-      setMyJobs(employerJobs);
+      // If your backend returns all apps for 'my-jobs', we extract unique jobs
+      // or simply use the jobs data if the endpoint is updated.
+      setMyJobs(jobsRes.data); 
       setStats(statsRes.data);
     } catch (err) {
       console.error("Error fetching dashboard data", err);
@@ -33,7 +33,6 @@ const EmployerDashboard = () => {
     fetchDashboardData();
   }, [user?.user_id]);
 
-  // 2. Handle Delete with Confirmation
   const handleDeleteJob = async (jobId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this listing? All associated applications will be permanently removed."
@@ -42,10 +41,9 @@ const EmployerDashboard = () => {
     if (confirmed) {
       try {
         await api.delete(`/jobs/${jobId}`);
-        // Refresh data to update the UI and the stats cards
         fetchDashboardData();
       } catch (err) {
-        alert("Failed to delete the job. Please try again.");
+        alert("Failed to delete the job.");
       }
     }
   };
@@ -61,12 +59,35 @@ const EmployerDashboard = () => {
     <div className="dashboard-layout">
       {/* SIDEBAR PANEL */}
       <aside className="sidebar">
-        <Link to="/" className="sidebar-logo">RecruitConnect</Link>
+        <div className="sidebar-brand">
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>RecruitConnect</Link>
+        </div>
         <nav className="sidebar-nav">
-          <NavLink to="/employer/dashboard" end>📊 Overview</NavLink>
-          <NavLink to="/employer/post-job">➕ Post New Job</NavLink>
-          <NavLink to="/employer/applications">📁 Applications</NavLink>
-          <NavLink to="/settings">⚙️ Settings</NavLink>
+          {/* Ensure these paths match your Route definitions in App.jsx */}
+          <NavLink 
+            to="/employer/dashboard" 
+            className={({ isActive }) => isActive ? "active-link" : ""}
+          >
+            📊 Overview
+          </NavLink>
+          <NavLink 
+            to="/employer/post-job"
+            className={({ isActive }) => isActive ? "active-link" : ""}
+          >
+            ➕ Post New Job
+          </NavLink>
+          <NavLink 
+            to="/employer/applications"
+            className={({ isActive }) => isActive ? "active-link" : ""}
+          >
+            📁 Applications
+          </NavLink>
+          <NavLink 
+            to="/settings"
+            className={({ isActive }) => isActive ? "active-link" : ""}
+          >
+            ⚙️ Settings
+          </NavLink>
         </nav>
       </aside>
 
@@ -77,44 +98,45 @@ const EmployerDashboard = () => {
           <p className="text-muted">Manage your listings and track applicants in real-time.</p>
         </header>
 
-        {/* DYNAMIC STATS GRID */}
+        {/* STATS GRID */}
         <div className="stats-grid">
           <div className="stat-card">
-            <span>Active Jobs</span>
-            <h2>{stats.activeJobs}</h2>
+            <span className="stat-label">Active Jobs</span>
+            <h2 className="stat-value">{stats.activeJobs}</h2>
           </div>
           <div className="stat-card">
-            <span>Total Applicants</span>
-            <h2>{stats.totalApplicants}</h2>
+            <span className="stat-label">Total Applicants</span>
+            <h2 className="stat-value">{stats.totalApplicants}</h2>
           </div>
           <div className="stat-card">
-            <span>Interviews</span>
-            <h2>{stats.interviews}</h2>
+            <span className="stat-label">Interviews</span>
+            <h2 className="stat-value">{stats.interviews}</h2>
           </div>
         </div>
 
         {/* JOB LIST */}
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <section style={{ marginTop: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Current Listings</h2>
-            <Link to="/employer/post-job" className="btn-purple" style={{ width: 'auto', textDecoration: 'none' }}>+ Post Job</Link>
+            <Link to="/employer/post-job" className="btn-purple" style={{ textDecoration: 'none' }}>
+              + Post Job
+            </Link>
           </div>
 
           <div className="job-list-wrapper">
             {myJobs.length > 0 ? (
               myJobs.map(job => (
-                <div key={job.id} className="stat-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                  <div>
-                    <h3 style={{ marginBottom: '4px' }}>{job.title}</h3>
-                    <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+                <div key={job.id} className="job-item-card">
+                  <div className="job-info">
+                    <h3 style={{ margin: 0 }}>{job.title}</h3>
+                    <p className="text-muted" style={{ fontSize: '0.9rem', margin: '5px 0 0 0' }}>
                       {job.location} • Posted on {formatDate(job.created_at)}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <span className="status-pill">Active</span>
+                  <div className="job-actions">
+                    <span className="status-badge">Active</span>
                     <button 
-                      className="btn-outline" 
-                      style={{ color: '#dc2626', borderColor: '#fee2e2' }}
+                      className="btn-delete"
                       onClick={() => handleDeleteJob(job.id)}
                     >
                       Delete
@@ -123,7 +145,7 @@ const EmployerDashboard = () => {
                 </div>
               ))
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: '#f8fafc', borderRadius: '12px' }}>
+              <div className="empty-state">
                 <p>You haven't posted any jobs yet.</p>
               </div>
             )}

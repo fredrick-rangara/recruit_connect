@@ -11,7 +11,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import JobDetails from './pages/JobDetails';
 import Success from './pages/Success';
-import Applications from './pages/Applications'; // NEW IMPORT
+import Applications from './pages/Applications';
 
 // Auth Components
 import Login from './features/auth/Login';
@@ -74,58 +74,68 @@ function App() {
       
       <main className="content-wrapper">
         <Routes>
-          {/* Public Routes */}
+          {/* ==========================================
+              PUBLIC ROUTES
+          ========================================== */}
           <Route path="/" element={<Home />} />
-          <Route path="/jobs/:id" element={<JobDetails />} />
-          <Route path="/job/:id" element={<JobDetails />} /> 
-          
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/success" element={<Success />} />
-          
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          
+          {/* Job Details (Standardized path) */}
+          <Route path="/job/:id" element={<JobDetails />} />
+          <Route path="/jobs/:id" element={<Navigate to="/job/:id" replace />} />
 
-          {/* Combined Application Tracking Route */}
+          {/* ==========================================
+              EMPLOYER ROUTES (Protected)
+          ========================================== */}
+          <Route path="/employer">
+            <Route 
+              path="dashboard" 
+              element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
+            />
+            {/* This fixes the side panel "Applications" link redirecting home */}
+            <Route 
+              path="applications" 
+              element={<ProtectedRoute allowedRole="employer"><Applications /></ProtectedRoute>} 
+            />
+            <Route 
+              path="post-job" 
+              element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
+            />
+            <Route 
+              path="edit-job/:id" 
+              element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} 
+            />
+            <Route 
+              path="jobs/:jobId/applicants" 
+              element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} 
+            />
+          </Route>
+
+          {/* ==========================================
+              SEEKER ROUTES (Protected)
+          ========================================== */}
+          <Route path="/seeker">
+            <Route 
+              path="dashboard" 
+              element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} 
+            />
+            <Route 
+              path="applications" 
+              element={<ProtectedRoute allowedRole="job_seeker"><Applications /></ProtectedRoute>} 
+            />
+          </Route>
+
+          {/* ==========================================
+              FALLBACK & UTILITY
+          ========================================== */}
           <Route 
             path="/applications" 
-            element={
-              <ProtectedRoute>
-                <Applications />
-              </ProtectedRoute>
-            } 
+            element={<ProtectedRoute><Applications /></ProtectedRoute>} 
           />
-
-          {/* Employer Protected Routes */}
-          <Route 
-            path="/employer/dashboard" 
-            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/employer-dashboard" 
-            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
-          />
-          
-          <Route 
-            path="/employer/post-job" 
-            element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/employer/edit-job/:id" 
-            element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/employer/jobs/:jobId/applicants" 
-            element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} 
-          />
-
-          {/* Seeker Protected Routes */}
-          <Route 
-            path="/seeker/dashboard" 
-            element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} 
-          />
-
-          {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
