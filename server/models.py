@@ -37,9 +37,13 @@ class Job(db.Model):
 
 class Application(db.Model):
     __tablename__ = 'applications'
+    
     id = db.Column(db.Integer, primary_key=True)
     job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
     seeker_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    resume_url = db.Column(db.String(255))
-    status = db.Column(db.String(20), default='Pending') # 'Pending', 'Accepted', 'Rejected'
-    applied_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String, default='pending') # pending, accepted, rejected
+    applied_at = db.Column(db.DateTime, default=db.func.now())
+
+    # Relationships to make data fetching easier
+    job = db.relationship('Job', backref='applications')
+    seeker = db.relationship('User', backref='my_applications')
