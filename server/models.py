@@ -10,11 +10,14 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String)
     email = db.Column(db.String, unique=True)
-    password_hash = db.Column(db.String) # <-- Check if this is the name!
+    password_hash = db.Column(db.String)
     role = db.Column(db.String)
     
     # Relationships
+    # This creates 'employer' on the Job model
     jobs_posted = db.relationship('Job', backref='employer', lazy=True)
+    
+    # This creates 'seeker' on the Application model
     applications = db.relationship('Application', backref='seeker', lazy=True)
 
     def set_password(self, password):
@@ -31,7 +34,7 @@ class Job(db.Model):
     location = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     salary_range = db.Column(db.String(50))
-    category = db.Column(db.String(50)) # e.g., 'Software', 'Design'
+    category = db.Column(db.String(50))
     employer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -41,9 +44,9 @@ class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
     seeker_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    status = db.Column(db.String, default='pending') # pending, accepted, rejected
+    status = db.Column(db.String, default='pending') 
     applied_at = db.Column(db.DateTime, default=db.func.now())
 
-    # Relationships to make data fetching easier
-    job = db.relationship('Job', backref='applications')
-    seeker = db.relationship('User', backref='my_applications')
+    # We only need to define the relationship to Job here.
+    # The 'seeker' relationship is already handled by the backref in the User model!
+    job = db.relationship('Job', backref='job_applications')
