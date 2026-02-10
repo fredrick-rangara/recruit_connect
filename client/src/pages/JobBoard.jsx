@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
 import api from "../api";
 import { Search, MapPin, DollarSign, Building2 } from "lucide-react";
 
