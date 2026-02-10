@@ -4,7 +4,7 @@ from models import db, Job, User
 
 main_bp = Blueprint('main', __name__)
 
-# 1. Get all jobs (For the Dashboard/Home)
+# 1. Get ALL jobs
 @main_bp.route('/jobs', methods=['GET'])
 def get_jobs():
     try:
@@ -12,6 +12,7 @@ def get_jobs():
         return jsonify([{
             "id": j.id,
             "title": j.title,
+            "company_name": j.company_name,
             "location": j.location,
             "salary_range": j.salary_range,
             "description": j.description,
@@ -20,6 +21,21 @@ def get_jobs():
     except Exception as e:
         return jsonify({"msg": str(e)}), 500
 
+# 2. Get a SINGLE job by ID
+@main_bp.route('/jobs/<int:job_id>', methods=['GET'])
+def get_job(job_id):
+    job = Job.query.get_or_404(job_id)
+    return jsonify({
+        "id": job.id,
+        "title": job.title,
+        "company_name": job.company_name,
+        "location": job.location,
+        "salary_range": job.salary_range,
+        "description": job.description,
+        "category": job.category
+    }), 200
+
+# 3. Create a job (Employer only)
 @main_bp.route('/jobs', methods=['POST'])
 @jwt_required()
 def create_job():
@@ -29,17 +45,16 @@ def create_job():
     try:
         user = User.query.get(int(identity))
         
-        # Pull the company name from the user who is posting
-        # If your field is named 'full_name', use user.full_name
-        company = user.full_name 
+        if not user or user.role != 'employer':
+            return jsonify({"msg": "Unauthorized: Employer role required"}), 403
 
         new_job = Job(
             title=data.get('title'),
-            company_name=company, # This fills the missing NOT NULL column
+            company_name=user.full_name, 
             description=data.get('description'),
             location=data.get('location'),
             salary_range=data.get('salary_range'),
-            category=data.get('category', 'General'), # Default if None
+            category=data.get('category', 'General'),
             employer_id=user.id
         )
         db.session.add(new_job)
