@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { MapPin, DollarSign, Building2, ArrowLeft, Send } from 'lucide-react';
+import { MapPin, DollarSign, Building2, ArrowLeft, Send, Loader2 } from 'lucide-react';
 
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false); // New state for button loading
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -22,6 +23,20 @@ const JobDetails = () => {
     };
     fetchJob();
   }, [id]);
+
+  // NEW: Function to handle the application
+  const handleApply = async () => {
+    setApplying(true);
+    try {
+      const response = await api.post(`/jobs/${id}/apply`);
+      alert(response.data.msg || "Application submitted successfully!");
+      navigate('/my-applications'); // Take Freddy to see his list of apps
+    } catch (err) {
+      alert(err.response?.data?.msg || "Failed to submit application");
+    } finally {
+      setApplying(false);
+    }
+  };
 
   if (loading) return <div className="text-center mt-20 animate-pulse">Loading job details...</div>;
   if (!job) return <div className="text-center mt-20">Job not found.</div>;
@@ -43,8 +58,17 @@ const JobDetails = () => {
               <Building2 size={20} /> {job.company_name}
             </div>
           </div>
-          <button className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-            <Send size={20} /> Apply Now
+          
+          {/* UPDATED BUTTON */}
+          <button 
+            onClick={handleApply}
+            disabled={applying}
+            className={`px-8 py-4 rounded-2xl font-bold flex items-center gap-2 transition shadow-lg shadow-blue-200 ${
+              applying ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {applying ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+            {applying ? 'Submitting...' : 'Apply Now'}
           </button>
         </div>
 
