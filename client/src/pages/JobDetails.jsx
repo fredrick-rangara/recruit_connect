@@ -1,103 +1,134 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api';
-import { MapPin, DollarSign, Building2, ArrowLeft, Send, Loader2 } from 'lucide-react';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { MapPin, Briefcase, Calendar, GraduationCap, DollarSign, Facebook, Twitter, Linkedin, CheckCircle2 } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const JobDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [applying, setApplying] = useState(false); // New state for button loading
 
-  useEffect(() => {
-    const fetchJob = async () => {
-      try {
-        const response = await api.get(`/jobs/${id}`);
-        setJob(response.data);
-      } catch (err) {
-        console.error("Error fetching job details", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJob();
-  }, [id]);
-
-  // NEW: Function to handle the application
-  const handleApply = async () => {
-    setApplying(true);
-    try {
-      const response = await api.post(`/jobs/${id}/apply`);
-      alert(response.data.msg || "Application submitted successfully!");
-      navigate('/my-applications'); // Take Freddy to see his list of apps
-    } catch (err) {
-      alert(err.response?.data?.msg || "Failed to submit application");
-    } finally {
-      setApplying(false);
-    }
+  // In a real app, you'd fetch this data from your Flask backend using the 'id'
+  const jobData = {
+    title: "Corporate Solutions Executive",
+    company: "Luffler and Sons",
+    location: "New York, USA",
+    salary: "$40k - $42k",
+    type: "Full Time",
+    experience: "3 Years",
+    degree: "Master",
+    category: "Commerce",
+    description: "Nunc sed a nisi purus. Mollis elit faucibus, porta lacus in aliquam. Sit amet elit sit amet mi. Felis eu ultrices a velit massa...",
   };
 
-  if (loading) return <div className="text-center mt-20 animate-pulse">Loading job details...</div>;
-  if (!job) return <div className="text-center mt-20">Job not found.</div>;
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-blue-600 mb-6 transition">
-        <ArrowLeft size={20} /> Back to Job Board
-      </button>
-
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <span className="bg-blue-100 text-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              {job.category || 'General'}
-            </span>
-            <h1 className="text-4xl font-black text-gray-900 mt-2">{job.title}</h1>
-            <div className="flex items-center gap-2 text-gray-600 mt-2 text-lg">
-              <Building2 size={20} /> {job.company_name}
-            </div>
-          </div>
-          
-          {/* UPDATED BUTTON */}
-          <button 
-            onClick={handleApply}
-            disabled={applying}
-            className={`px-8 py-4 rounded-2xl font-bold flex items-center gap-2 transition shadow-lg shadow-blue-200 ${
-              applying ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            {applying ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
-            {applying ? 'Submitting...' : 'Apply Now'}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-6 bg-gray-50 rounded-2xl mb-8">
-          <div className="flex items-center gap-3">
-            <MapPin className="text-blue-500" />
-            <div>
-              <p className="text-xs text-gray-500 uppercase font-bold">Location</p>
-              <p className="font-medium">{job.location}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <DollarSign className="text-blue-500" />
-            <div>
-              <p className="text-xs text-gray-500 uppercase font-bold">Salary</p>
-              <p className="font-medium">{job.salary_range}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="prose max-w-none">
-          <h3 className="text-xl font-bold mb-4">Description</h3>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {job.description}
-          </p>
-        </div>
+    <div className="bg-slate-50 min-h-screen">
+      <Navbar />
+      
+      {/* Header Banner */}
+      <div className="bg-slate-900 py-16 text-center">
+        <h1 className="text-4xl font-bold text-white">Job Details</h1>
       </div>
+
+      <main className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column: Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          <section className="bg-white p-8 rounded-2xl shadow-sm">
+            <h2 className="text-2xl font-bold mb-4">Job Description</h2>
+            <p className="text-slate-600 leading-relaxed">{jobData.description}</p>
+            
+            <h3 className="text-xl font-bold mt-8 mb-4">Key Responsibilities</h3>
+            <ul className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <li key={i} className="flex items-start gap-3 text-slate-600">
+                  <CheckCircle2 className="text-indigo-600 mt-1 shrink-0" size={18} />
+                  <span>Et nunc ut tempus duis nisl sed massa. Ornare varius faucibus nisl vitae cras ornare.</span>
+                </li>
+              ))}
+            </ul>
+
+            <h3 className="text-xl font-bold mt-8 mb-4">Professional Skills</h3>
+            <ul className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <li key={i} className="flex items-start gap-3 text-slate-600">
+                  <CheckCircle2 className="text-indigo-600 mt-1 shrink-0" size={18} />
+                  <span>Ornare varius faucibus nisl vitae cras ornare.</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-10 pt-8 border-t border-slate-100 flex items-center justify-between">
+              <div className="flex gap-2">
+                {['Full time', 'Commerce', 'New York'].map(tag => (
+                  <span key={tag} className="bg-slate-100 text-slate-600 px-4 py-1 rounded-full text-sm">{tag}</span>
+                ))}
+              </div>
+              <div className="flex gap-4 text-slate-400">
+                <Facebook size={20} className="hover:text-indigo-600 cursor-pointer" />
+                <Twitter size={20} className="hover:text-indigo-600 cursor-pointer" />
+                <Linkedin size={20} className="hover:text-indigo-600 cursor-pointer" />
+              </div>
+            </div>
+          </section>
+
+          {/* Bottom Card (Similar Job Preview) */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 font-bold text-xl">L</div>
+              <div>
+                <h4 className="font-bold text-lg">{jobData.title}</h4>
+                <p className="text-slate-500 text-sm">{jobData.company}</p>
+              </div>
+            </div>
+            <button className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition">
+              Apply Job
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Sidebar */}
+        <aside className="space-y-6">
+          {/* Job Overview */}
+          <div className="bg-indigo-50/50 p-8 rounded-2xl border border-indigo-100">
+            <h3 className="text-xl font-bold mb-6">Job Overview</h3>
+            <div className="space-y-6">
+              <SidebarItem icon={<Briefcase size={20}/>} label="Job Title" value={jobData.title} />
+              <SidebarItem icon={<Calendar size={20}/>} label="Job Type" value={jobData.type} />
+              <SidebarItem icon={<GraduationCap size={20}/>} label="Degree" value={jobData.degree} />
+              <SidebarItem icon={<DollarSign size={20}/>} label="Offered Salary" value={jobData.salary} />
+              <SidebarItem icon={<MapPin size={20}/>} label="Location" value={jobData.location} />
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div className="bg-indigo-50/50 p-8 rounded-2xl border border-indigo-100">
+            <h3 className="text-xl font-bold mb-4">Send Us Message</h3>
+            <form className="space-y-4">
+              <input type="text" placeholder="Full name" className="w-full p-3 rounded-xl bg-white border-none outline-none text-sm" />
+              <input type="email" placeholder="Email Address" className="w-full p-3 rounded-xl bg-white border-none outline-none text-sm" />
+              <textarea placeholder="Your Message" rows="4" className="w-full p-3 rounded-xl bg-white border-none outline-none text-sm resize-none"></textarea>
+              <button className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">
+                Send Message
+              </button>
+            </form>
+          </div>
+        </aside>
+
+      </main>
+
+      <Footer />
     </div>
   );
 };
+
+const SidebarItem = ({ icon, label, value }) => (
+  <div className="flex items-start gap-4">
+    <div className="text-indigo-600 mt-1">{icon}</div>
+    <div>
+      <p className="text-xs text-slate-500 uppercase font-semibold tracking-wider">{label}</p>
+      <p className="text-slate-900 font-medium">{value}</p>
+    </div>
+  </div>
+);
 
 export default JobDetails;
