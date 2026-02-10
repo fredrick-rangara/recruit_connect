@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import api from '../api';
-import { Search, MapPin, DollarSign, Building2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import api from "../api";
+import { Search, MapPin, DollarSign, Building2 } from "lucide-react";
 
 const JobBoard = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,7 +9,7 @@ const JobBoard = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await api.get('/jobs');
+        const response = await api.get("/jobs");
         setJobs(response.data);
       } catch (err) {
         console.error("Error fetching jobs", err);
@@ -23,8 +23,12 @@ const JobBoard = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <header className="mb-10 text-center">
-        <h1 className="text-4xl font-extrabold text-gray-900">Find Your Next Career</h1>
-        <p className="text-gray-500 mt-2 text-lg">Browse the latest opportunities on RecruitConnect</p>
+        <h1 className="text-4xl font-extrabold text-gray-900">
+          Find Your Next Career
+        </h1>
+        <p className="text-gray-500 mt-2 text-lg">
+          Browse the latest opportunities on RecruitConnect
+        </p>
       </header>
 
       {loading ? (
@@ -34,13 +38,18 @@ const JobBoard = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobs.map((job) => (
-            <div key={job.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition">
+            <div
+              key={job.id}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
                   <Building2 size={24} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{job.title}</h3>
+                  <h3 className="font-bold text-lg text-gray-900 leading-tight">
+                    {job.title}
+                  </h3>
                   <p className="text-sm text-gray-500">{job.company_name}</p>
                 </div>
               </div>
@@ -54,9 +63,12 @@ const JobBoard = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-blue-50 text-blue-600 font-semibold py-2 rounded-xl hover:bg-blue-600 hover:text-white transition">
+              <Link
+                to={`/jobs/${job.id}`}
+                className="w-full ... text-center block"
+              >
                 View Details
-              </button>
+              </Link>
             </div>
           ))}
         </div>
