@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Job, User
+from models import db, Job, User, Application # Added Application import
 
 main_bp = Blueprint('main', __name__)
 
@@ -44,7 +44,6 @@ def create_job():
 
     try:
         user = User.query.get(int(identity))
-        
         if not user or user.role != 'employer':
             return jsonify({"msg": "Unauthorized: Employer role required"}), 403
 
@@ -60,8 +59,32 @@ def create_job():
         db.session.add(new_job)
         db.session.commit()
         return jsonify({"msg": "Job posted successfully"}), 201
-        
     except Exception as e:
-        print(f"DATABASE ERROR: {str(e)}")
         db.session.rollback()
         return jsonify({"msg": "Server error processing request"}), 500
+
+# 4. Apply to a job (Seeker only)
+@main_bp.route('/jobs/<int:job_id>/apply', methods=['POST'])
+@jwt_required()
+def apply_to_job(job_id):
+    identity = get_jwt_identity()
+    try:
+        user = User.query.get(int(identity))
+
+        if user.role != 'seeker':
+            return jsonify({"msg": "Only seekers can apply for jobs"}), 403
+
+        # Check if already applied
+        existing = Application.query.filter_by(job_id=job_id, seeker_id=user.id).first()
+        if existing:
+            return jsonify({"msg": "You have already applied for this job"}), 400
+
+        new_app = Application(job_id=job_id, seeker_id=user.id)
+        db.session.add(new_app)
+        db.session.commit()
+
+        return jsonify({"msg": "Application submitted successfully!"}), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"APPLICATION ERROR: {str(e)}")
+        return jsonify({"msg": "Failed to submit application"}), 500
