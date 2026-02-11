@@ -1,128 +1,180 @@
-import React, { useState, useEffect } from 'react';
-import api from '../services/api';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchJobs } from '../store/jobsSlice';
+import { fetchTalent } from '../store/usersSlice';
+import JobCard from '../components/JobCard';
+import TalentCard from '../components/TalentCard';
 
-const Home = () => {
-  const [jobs, setJobs] = useState([]);
-  const [keyword, setKeyword] = useState('');
-  const [category, setCategory] = useState('');
-  const [location, setLocation] = useState('');
+function Home() {
+  const dispatch = useDispatch();
+  const jobsState = useSelector((state) => state.jobs) || { list: [], status: 'idle' };
+  const usersState = useSelector((state) => state.users) || { talentList: [], status: 'idle' };
+  const { list: jobs, status: jobsStatus } = jobsState;
+  const { talentList: talent, status: usersStatus } = usersState;
+
+  const [searchType, setSearchType] = React.useState('jobs');
+  const [query, setQuery] = React.useState('');
+  const [locationQuery, setLocationQuery] = React.useState('');
+  const [categoryQuery, setCategoryQuery] = React.useState('');
+
+  const currentList = searchType === 'jobs' ? jobs : talent;
+  const currentStatus = searchType === 'jobs' ? jobsStatus : usersStatus;
 
   useEffect(() => {
-    fetchJobs();
-  }, [category, keyword, location]);
+    dispatch(fetchJobs()).catch(err => console.error("Initial fetch failed:", err));
+  }, [dispatch]);
 
-  const fetchJobs = async () => {
-    try {
-      const res = await api.get(`/jobs?keyword=${keyword}&category=${category}&location=${location}`);
-      setJobs(res.data);
-    } catch (err) {
-      console.error("Filter error:", err);
+  const handleSearch = () => {
+    if (searchType === 'talent') {
+      dispatch(fetchTalent(query));
+    } else {
+      const filters = {};
+      if (query && query.trim()) filters.title = query;
+      if (locationQuery && locationQuery.trim()) filters.location = locationQuery;
+      if (categoryQuery && categoryQuery !== 'Select Category' && categoryQuery !== 'All Categories') filters.category = categoryQuery;
+      
+      dispatch(fetchJobs(filters));
     }
   };
 
-  const resetSearch = () => {
-    setKeyword('');
-    setCategory('');
-    setLocation('');
-  };
-
   return (
-    <div className="page-bg">
-      <header className="hero-section">
+    <div className="home-page">
+      <header className="hero">
         <div className="container">
-          <div className="page-hero">
-            <h1>Find your next great opportunity</h1>
-            <p className="text-muted">Browse thousands of jobs from top-tier companies</p>
+          <h1 style={{ marginBottom: '15px' }}>Find Your Dream Job Today!</h1>
+          <p style={{ margin: '0 auto 40px', opacity: 0.9, maxWidth: '700px', fontSize: '1.2rem' }}>
+            Connecting Talent with Opportunity: Your Gateway to Career Success.
+          </p>
+          
+          <div className="advanced-search-bar">
+            <div className="search-field">
+              <span style={{ marginRight: '10px' }}>🔍</span>
+              <input 
+                type="text" 
+                placeholder="Job Title or Company" 
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <div className="search-field">
+              <span style={{ marginRight: '10px' }}>📍</span>
+              <input 
+                type="text" 
+                placeholder="Select Location" 
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <div className="search-field">
+              <span style={{ marginRight: '10px' }}>📁</span>
+              <select 
+                value={categoryQuery} 
+                onChange={(e) => setCategoryQuery(e.target.value)}
+              >
+                <option>All Categories</option>
+                <option>Engineering</option>
+                <option>Design</option>
+                <option>Marketing</option>
+                <option>HR</option>
+                <option>Data Science</option>
+                <option>Sales</option>
+                <option>Customer Support</option>
+              </select>
+            </div>
+            <button className="btn-search" onClick={handleSearch}>
+              Search Job
+            </button>
           </div>
 
-          {/* Optimized Search Bar */}
-          <div className="search-bar-container">
-            <div className="search-field">
-              <span>🔍</span>
-              <input 
-                type="text" 
-                placeholder="Job title or keyword" 
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)} 
-              />
+          <div className="stats-overview">
+            <div className="stat-card">
+              <div className="stat-icon">💼</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>25,850</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Jobs</div>
+              </div>
             </div>
-            <div className="search-field">
-              <span>📍</span>
-              <input 
-                type="text" 
-                placeholder="City or state" 
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
+            <div className="stat-card">
+              <div className="stat-icon">👥</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>10,250</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Candidates</div>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '10px', padding: '5px' }}>
-              <button className="btn-purple" style={{ width: '120px' }}>Search</button>
-              {(keyword || category || location) && (
-                <button onClick={resetSearch} className="btn-outline" style={{ padding: '10px' }}>Reset</button>
-              )}
+            <div className="stat-card">
+              <div className="stat-icon">🏢</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>18,400</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Companies</div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container">
-        {/* Horizontal Category Selection (Clean Pills) */}
-        <section style={{ margin: '40px 0' }}>
-          <h3 style={{ fontWeight: 700, marginBottom: '15px' }}>Browse by Category</h3>
-          <div className="category-pills">
-            {['Technology', 'Marketing', 'Design', 'Commerce'].map(cat => (
-              <label key={cat}>
-                <input 
-                  type="radio" 
-                  name="category"
-                  checked={category === cat}
-                  onChange={() => setCategory(cat)}
-                />
-                <span>{cat}</span>
-              </label>
-            ))}
-          </div>
-        </section>
+      <div className="brand-bar">
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>slack</div>
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>Adobe</div>
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>asana</div>
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>Linear</div>
+      </div>
 
-        {/* Job Feed */}
-        <main className="job-feed" style={{ marginTop: '20px' }}>
-          {jobs.length > 0 ? jobs.map(job => (
-            <div key={job.id} className="stat-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                <div className="company-logo-placeholder">
-                  {job.company ? job.company[0] : 'J'}
-                </div>
-                <div>
-                  <h3 style={{ marginBottom: '4px', fontWeight: 700 }}>{job.title}</h3>
-                  <p className="text-muted">{job.company} • {job.location}</p>
-                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
-                    <span className="status-pill">💰 ${job.salary_max?.toLocaleString() || 'N/A'}</span>
-                    <span className="status-pill">🏷️ {job.category}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <Link 
-                to={`/jobs/${job.id}`} 
-                className="btn-purple"
-                style={{ width: 'auto', textDecoration: 'none', padding: '12px 24px' }}
-              >
-                Details
-              </Link>
+      <main className="container">
+        <section style={{ padding: '60px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+            <div>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: 0 }}>Recent Job Listings</h2>
+              <p style={{ color: '#666', marginTop: '10px' }}>At eu lobortis pretium tincidunt amet lacus ut aenean aliquet...</p>
             </div>
-          )) : (
-            <div style={{ textAlign: 'center', padding: '60px', background: 'var(--bg-gray)', borderRadius: '20px' }}>
-              <p className="text-muted">No jobs found matching your criteria.</p>
-              <button onClick={resetSearch} className="purple-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, marginTop: '10px' }}>
-                Clear all filters
-              </button>
+            <span style={{ color: 'var(--primary-color)', fontWeight: '700', cursor: 'pointer', borderBottom: '2px solid' }}>View all</span>
+          </div>
+          
+          {currentStatus === 'failed' && (
+            <div style={{ textAlign: 'center', color: 'red', marginBottom: '20px' }}>
+              Oops! We couldn't fetch the results. Please make sure the backend is running.
             </div>
           )}
-        </main>
-      </div>
+
+          <div className="job-list">
+            {currentStatus === 'loading' ? (
+              <div style={{ textAlign: 'center', padding: '50px' }}>
+                <div className="spinner" style={{ borderColor: 'var(--primary-color)', borderTopColor: 'transparent', width: '40px', height: '40px', margin: '0 auto' }}></div>
+              </div>
+            ) : (
+              Array.isArray(currentList) && currentList.length > 0 ? (
+                currentList.map((item) => (
+                  searchType === 'jobs' 
+                    ? <JobCard key={item.id} job={item} />
+                    : <TalentCard key={item.id} talent={item} />
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '100px', background: '#f9f9f9', borderRadius: '20px', color: '#666' }}>
+                  No jobs found matching your criteria. Try adjusting your search!
+                </div>
+              )
+            )}
+          </div>
+
+          <div style={{ marginTop: '80px', background: '#f5f5f5', padding: '40px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '50px' }}>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ marginBottom: '15px', fontSize: '2rem' }}>Ready for your next move?</h2>
+              <p style={{ color: '#666', marginBottom: '30px', fontSize: '1.1rem' }}>Create your profile and let top employers find you. Join thousands of professionals growing their careers on RecruitConnect.</p>
+              <button className="btn btn-primary" style={{ padding: '15px 40px', borderRadius: '12px' }}>Get Started Now</button>
+            </div>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+              <img 
+                src="/images/hero_purple.png" 
+                alt="App Interface" 
+                style={{ width: '400px', borderRadius: '10px' }}
+              />
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
-};
+}
 
 export default Home;

@@ -1,93 +1,51 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-
-// Common Components
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
+import Jobs from './pages/Jobs';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ResetPassword from './pages/ResetPassword';
 import JobDetails from './pages/JobDetails';
+import Dashboard from './pages/Dashboard';
+import EmployerDashboard from './pages/EmployerDashboard';
+import EmployerProfile from './pages/EmployerProfile';
+import PostJob from './pages/PostJob';
+import Profile from './pages/Profile';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import './index.css';
 
-// Auth Components
-import Login from './features/auth/Login';
-import Signup from './features/auth/Signup';
-
-// Employer Features
-import EmployerDashboard from './features/employer/EmployerDashboard';
-import PostJob from './features/employer/PostJob';
-import EditJob from './features/employer/EditJob';
-import JobApplicants from './features/employer/JobApplicants';
-
-// Seeker Features
-import SeekerDashboard from './features/seeker/SeekerDashboard';
-
-// --- UTILITY: Scroll To Top on Route Change ---
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-};
-
-// --- WRAPPER: Protected Routes ---
-const ProtectedRoute = ({ children, allowedRole }) => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (allowedRole && role !== allowedRole) return <Navigate to="/" replace />;
-  
-  return children;
-};
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <Router>
-      <ScrollToTop /> {/* Ensures users start at the top of the Job Details page */}
-      <Navbar />
-      
-      <main className="content-wrapper">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/jobs/:id" element={<JobDetails />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-
-          {/* Employer Protected Routes */}
-          <Route 
-            path="/employer/dashboard" 
-            element={<ProtectedRoute allowedRole="employer"><EmployerDashboard /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/employer/post-job" 
-            element={<ProtectedRoute allowedRole="employer"><PostJob /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/employer/edit-job/:id" 
-            element={<ProtectedRoute allowedRole="employer"><EditJob /></ProtectedRoute>} 
-          />
-          <Route 
-            path="/employer/jobs/:jobId/applicants" 
-            element={<ProtectedRoute allowedRole="employer"><JobApplicants /></ProtectedRoute>} 
-          />
-
-          {/* Seeker Protected Routes */}
-          <Route 
-            path="/seeker/dashboard" 
-            element={<ProtectedRoute allowedRole="job_seeker"><SeekerDashboard /></ProtectedRoute>} 
-          />
-
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-
-      <Footer />
+      <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Toaster position="top-right" reverseOrder={false} />
+        <Navbar />
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/jobs/:id" element={<JobDetails />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/employer-dashboard" element={<EmployerDashboard />} />
+            <Route path="/company/:id" element={<EmployerProfile />} />
+            <Route path="/post-job" element={<PostJob />} />
+            <Route path="/edit-job/:id" element={<PostJob />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="*" element={<div className="container" style={{ padding: '100px', textAlign: 'center' }}><h2>404: Page Not Found</h2><Link to="/">Go Home</Link></div>} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     </Router>
   );
 }

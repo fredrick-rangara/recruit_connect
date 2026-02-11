@@ -1,69 +1,49 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Footer = () => (
-  <footer className="footer-dark">
-    <div className="container">
-      <div className="footer-content" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: '40px', padding: '60px 0' }}>
-        
-        {/* Brand Column */}
-        <div className="footer-brand">
-          <h3 style={{ color: 'white', marginBottom: '20px' }}>💼 RecruitConnect</h3>
-          <p style={{ color: '#9ca3af', lineHeight: '1.6' }}>
-            Quis enim pellentesque viverra tellus eget malesuada facilisis. 
-            Congue nibh vivamus aliquet nunc mauris d...
-          </p>
+function Footer() {
+  return (
+    <footer style={{ 
+      backgroundColor: 'white', 
+      padding: '50px 0', 
+      marginTop: '80px',
+      borderTop: '1px solid #eee'
+    }}>
+      <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px' }}>
+        <div>
+          <h3 style={{ color: 'var(--primary-color)', marginBottom: '20px' }}>RecruitConnect</h3>
+          <p style={{ color: 'var(--text-light)' }}>Connecting the world's best talent with the most innovative companies.</p>
         </div>
-
-        {/* Company Column */}
-        <div className="footer-links">
-          <h4 style={{ color: 'white', marginBottom: '20px' }}>Company</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '10px' }}><Link to="/about" style={{ color: '#9ca3af', textDecoration: 'none' }}>About Us</Link></li>
-            <li style={{ marginBottom: '10px' }}><Link to="/team" style={{ color: '#9ca3af', textDecoration: 'none' }}>Our Team</Link></li>
-            <li style={{ marginBottom: '10px' }}><Link to="/partners" style={{ color: '#9ca3af', textDecoration: 'none' }}>Partners</Link></li>
-            <li style={{ marginBottom: '10px' }}><Link to="/employer/dashboard" style={{ color: '#9ca3af', textDecoration: 'none' }}>For Employers</Link></li>
+        <div>
+          <h4>For Seekers</h4>
+          <ul style={{ listStyle: 'none', marginTop: '20px', color: 'var(--text-light)' }}>
+            <li style={{ marginBottom: '10px' }}>Browse Jobs</li>
+            <li style={{ marginBottom: '10px' }}>Job Alerts</li>
+            <li style={{ marginBottom: '10px' }}>Career Advice</li>
           </ul>
         </div>
-
-        {/* Categories Column */}
-        <div className="footer-links">
-          <h4 style={{ color: 'white', marginBottom: '20px' }}>Job Categories</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '10px' }}><Link to="/jobs" style={{ color: '#9ca3af', textDecoration: 'none' }}>Telecommunications</Link></li>
-            <li style={{ marginBottom: '10px' }}><Link to="/jobs" style={{ color: '#9ca3af', textDecoration: 'none' }}>Hotels & Tourism</Link></li>
-            <li style={{ marginBottom: '10px' }}><Link to="/jobs" style={{ color: '#9ca3af', textDecoration: 'none' }}>Construction</Link></li>
-            <li style={{ marginBottom: '10px' }}><Link to="/jobs" style={{ color: '#9ca3af', textDecoration: 'none' }}>Financial Services</Link></li>
+        <div>
+          <h4>For Employers</h4>
+          <ul style={{ listStyle: 'none', marginTop: '20px', color: 'var(--text-light)' }}>
+            <li style={{ marginBottom: '10px' }}>Post a Job</li>
+            <li style={{ marginBottom: '10px' }}>ATS Features</li>
+            <li style={{ marginBottom: '10px' }}>Pricing</li>
           </ul>
         </div>
-
-        {/* Newsletter Column */}
-        <div className="footer-newsletter">
-          <h4 style={{ color: 'white', marginBottom: '20px' }}>Newsletter</h4>
-          <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginBottom: '15px' }}>
-            Eu non pretium vitae platea. Nec tellus elementum vulputate.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input 
-              type="email" 
-              placeholder="Email Address" 
-              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #374151', background: '#1f2937', color: 'white' }}
-            />
-            <button className="btn-purple-main" style={{ width: '100%' }}>Subscribe now</button>
-          </div>
+        <div>
+          <h4>Support</h4>
+          <ul style={{ listStyle: 'none', marginTop: '20px', color: 'var(--text-light)' }}>
+            <li style={{ marginBottom: '10px' }}><Link to="/about" style={{ textDecoration: 'none', color: 'inherit' }}>About Us</Link></li>
+            <li style={{ marginBottom: '10px' }}><Link to="/contact" style={{ textDecoration: 'none', color: 'inherit' }}>Contact Us</Link></li>
+            <li style={{ marginBottom: '10px' }}>Privacy Policy</li>
+          </ul>
         </div>
       </div>
-
-      {/* Footer Bottom */}
-      <div className="footer-bottom" style={{ borderTop: '1px solid #374151', padding: '30px 0', display: 'flex', justifyContent: 'space-between', color: '#6b7280', fontSize: '0.85rem' }}>
-        <p>© Copyright Job Portal 2026. Designed by Figma.guru</p>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <Link to="/privacy" style={{ color: '#6b7280', textDecoration: 'none' }}>Privacy Policy</Link>
-          <Link to="/terms" style={{ color: '#6b7280', textDecoration: 'none' }}>Terms & Conditions</Link>
-        </div>
+      <div className="container" style={{ textAlign: 'center', marginTop: '50px', paddingTop: '20px', borderTop: '1px solid #f5f5f5', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+        &copy; {new Date().getFullYear()} RecruitConnect. All rights reserved.
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+}
 
 export default Footer;
