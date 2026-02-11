@@ -5,4 +5,4 @@ nixPkgs = ["python311", "gcc"]
 cmds = ["cd server && pip install -r requirements.txt"]
 
 [start]
-cmd = "cd server && gunicorn \"app:create_app()\""
+cmd = "gunicorn --chdir server 'app:create_app()'"
