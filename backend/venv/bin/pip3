@@ -1,4 +1,4 @@
-#!/home/freddy/Development/Code/phase_5/recruit_connect/backend/venv/bin/python
+#!/home/freddy/Development/Code/phase_5/job_hunter/backend/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
