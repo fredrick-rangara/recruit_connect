@@ -121,7 +121,7 @@ export default function Login() {
 
           <div className="mt-10 pt-10 border-t border-slate-100 text-center">
             <p className="text-slate-500 font-bold text-sm">
-              New to JobHunter? <Link to="/signup" className="text-purple-600 hover:underline">Create an account</Link>
+              New to Recruit Connect? <Link to="/signup" className="text-purple-600 hover:underline">Create an account</Link>
             </p>
           </div>
         </div>

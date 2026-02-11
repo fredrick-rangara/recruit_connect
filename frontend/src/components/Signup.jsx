@@ -42,7 +42,7 @@ export default function Signup() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-20">
         <div className="max-w-md w-full">
           <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight">Create Account</h2>
-          <p className="text-slate-500 font-bold mb-8">Choose how you want to use JobHunter.</p>
+          <p className="text-slate-500 font-bold mb-8">Choose how you want to use Recruit Connect.</p>
 
           {/* ROLE SELECTOR CARDS */}
           <div className="grid grid-cols-2 gap-4 mb-8">

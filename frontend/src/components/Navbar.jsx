@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('role'); // Get the role (seeker or employer)
+  
+  // Safely get user info from localStorage
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+  const userRole = user.role; 
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role'); // Clear the role on logout
+    localStorage.clear(); // Clears everything (token, user, role)
     navigate('/login');
   };
 
@@ -24,7 +26,11 @@ export default function Navbar() {
           <div className="hidden md:flex gap-8 text-sm font-bold text-slate-500">
             <Link to="/" className="hover:text-purple-600 transition-colors">Find Jobs</Link>
             
-            {/* Show Employer Console only if the user is an employer */}
+            {/* Added Static Links */}
+            <Link to="/about" className="hover:text-purple-600 transition-colors">About Us</Link>
+            <Link to="/contact" className="hover:text-purple-600 transition-colors">Contact</Link>
+            
+            {/* Conditional Dashboard Links */}
             {token && userRole === 'employer' && (
               <Link 
                 to="/dashboard" 
@@ -35,9 +41,10 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* If seeker is logged in, you could add 'My Applications' here later */}
             {token && userRole === 'seeker' && (
-              <Link to="/applications" className="hover:text-purple-600 transition-colors">My Applications</Link>
+              <Link to="/applications" className="hover:text-purple-600 transition-colors text-purple-600">
+                My Applications
+              </Link>
             )}
           </div>
         </div>
@@ -62,8 +69,13 @@ export default function Navbar() {
           ) : (
             <div className="flex items-center gap-4">
               {/* Profile Avatar Placeholder */}
-              <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center text-xs font-black text-slate-400">
-                {userRole === 'employer' ? 'EMP' : 'USR'}
+              <div className="flex items-center gap-3 pr-2">
+                <span className="text-xs font-bold text-slate-400 hidden sm:block">
+                  {user.name || 'Account'}
+                </span>
+                <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+                  {userRole === 'employer' ? 'EMP' : 'SEEK'}
+                </div>
               </div>
               
               <button 
