@@ -3,7 +3,7 @@ import API from '../api';
 
 // Async thunk to fetch jobs from the backend
 export const fetchJobs = createAsyncThunk('jobs/fetchJobs', async (filters) => {
-  const response = await API.get('/jobs', { params: filters });
+  const response = await axios.get('http://localhost:5000/api/jobs', { params: filters }); // Or fetch()
   return response.data;
 });
 
