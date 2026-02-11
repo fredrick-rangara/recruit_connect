@@ -1,162 +1,200 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from "../services/api";
-import { mockJobs } from "../data/mockJobs"; // Import mockJobs for fallback
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-hot-toast';
+import API from '../api';
 
-const JobDetails = () => {
+function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const [applied, setApplied] = useState(false);
+  const [showApplyForm, setShowApplyForm] = useState(false);
+  const [resumeUrl, setResumeUrl] = useState('');
+  const [coverLetter, setCoverLetter] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchJob = async () => {
-      setLoading(true);
-      try {
-        // 1. Try fetching from Backend first
-        const res = await api.get(`/jobs/${id}`);
+    API.get(`/jobs/${id}`)
+      .then(res => {
         setJob(res.data);
-      } catch (err) {
-        console.warn("Backend fetch failed, checking mock data...");
-        // 2. FALLBACK: Look in mockJobs if backend fails or isn't seeded
-        // Standardizing IDs to strings for a safe comparison
-        const foundMock = mockJobs.find((j) => String(j.id) === String(id));
-        if (foundMock) {
-          setJob(foundMock);
-        }
-      } finally {
         setLoading(false);
-      }
-    };
-    fetchJob();
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, [id]);
 
   const handleApply = async (e) => {
-    if (e) e.preventDefault();
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      alert("Please login as a Job Seeker to apply.");
-      return navigate('/login');
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error('Please login or sign up to apply for this job');
+      navigate('/login');
+      return;
     }
-
     setApplying(true);
     try {
-      await api.post(`/jobs/${id}/apply`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
+      await API.post('/applications', { 
+        job_id: id,
+        resume_url: resumeUrl,
+        cover_letter: coverLetter
       });
-      setApplied(true);
-      setTimeout(() => navigate("/"), 3000);
+      toast.success('Application submitted successfully!');
+      navigate('/dashboard');
     } catch (err) {
-      alert(err.response?.data?.msg || "Something went wrong. Have you already applied?");
+      toast.error(err.response?.data?.msg || 'Failed to apply');
     } finally {
       setApplying(false);
     }
   };
 
-  if (loading) return <div className="container" style={{padding: '100px', textAlign: 'center'}}>Loading job details...</div>;
-  
-  if (!job) return (
-    <div className="container" style={{padding: '100px', textAlign: 'center'}}>
-      <h2>Job not found.</h2>
-      <button onClick={() => navigate('/')} className="btn-purple" style={{marginTop: '20px', width: 'auto'}}>Return Home</button>
-    </div>
-  );
+  const handleSaveJob = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please login or sign up to save this job');
+      navigate('/login');
+      return;
+    }
+    setSaving(true);
+    try {
+      await API.post('/jobs/save', { job_id: id });
+      toast.success('Job saved successfully!');
+    } catch (err) {
+      toast.error(err.response?.data?.msg || 'Failed to save job');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="container" style={{ padding: '100px', textAlign: 'center' }}>Loading...</div>;
+  if (!job) return <div className="container" style={{ padding: '100px', textAlign: 'center' }}>Job not found</div>;
 
   return (
-    <div className="page-bg" style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      {/* JOB HEADER */}
-      <header style={{ borderBottom: '1px solid #e2e8f0', padding: '60px 0', background: 'white' }}>
-        <div className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
-          <button onClick={() => navigate(-1)} style={{marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'none', border: 'none', color: '#7c3aed', fontWeight: '600', fontSize: '1rem'}}>
-            ← Back to listings
-          </button>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-              <div style={{width: '80px', height: '80px', fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#7c3aed', color: 'white', borderRadius: '16px', fontWeight: 'bold'}}>
-                {job.company ? job.company[0] : 'J'}
-              </div>
-              <div>
-                <h1 style={{fontSize: '2.5rem', fontWeight: '800', color: '#0f172a', marginBottom: '4px'}}>{job.title}</h1>
-                <p style={{fontSize: '1.25rem', color: '#64748b', fontWeight: '500'}}>{job.company} • {job.location}</p>
-              </div>
-            </div>
-            <div>
-               <span style={{fontSize: '1.1rem', padding: '12px 24px', background: '#f5f3ff', color: '#7c3aed', borderRadius: '12px', fontWeight: '700', border: '1px solid #ddd6fe'}}>
-                  💰 ${job.salary_max?.toLocaleString() || job.salary?.toLocaleString()} / year
-               </span>
-            </div>
+    <div className="container" style={{ padding: '40px 20px' }}>
+      <button 
+        onClick={() => navigate('/')} 
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          color: 'var(--primary-color)', 
+          cursor: 'pointer', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px', 
+          fontSize: '1.1rem', 
+          fontWeight: '600',
+          marginBottom: '30px',
+          padding: 0
+        }}
+      >
+        ← Back to Job Listings
+      </button>
+      <div className="job-card" style={{ borderLeftWidth: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+          <div>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{job.title}</h1>
+            <Link to={`/company/${job.company?.id}`} style={{ textDecoration: 'none' }}>
+              <p style={{ fontSize: '1.2rem', color: 'var(--primary-color)', fontWeight: '600' }}>
+                @ {job.company?.name || 'TechCorp'} <span style={{ fontSize: '0.9rem', fontWeight: '400' }}>(View Profile)</span>
+              </p>
+            </Link>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2ecc71' }}>{job.salary_range}</p>
+            <p style={{ color: 'var(--text-light)' }}>{job.location}</p>
           </div>
         </div>
-      </header>
 
-      {/* JOB BODY */}
-      <div className="container" style={{ maxWidth: '1000px', margin: '40px auto', padding: '0 20px', paddingBottom: '100px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 320px', gap: '40px' }}>
-          
-          <main>
-            <section style={{ background: 'white', padding: '40px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <h3 style={{fontSize: '1.5rem', fontWeight: '700', marginBottom: '24px', color: '#1e293b'}}>Description</h3>
-              <p style={{ whiteSpace: 'pre-line', color: '#475569', lineHeight: '1.8', fontSize: '1.05rem' }}>
-                {job.description}
-              </p>
-              
-              <h3 style={{marginTop: '48px', marginBottom: '24px', fontSize: '1.5rem', fontWeight: '700', color: '#1e293b'}}>Requirements</h3>
-              <ul style={{ paddingLeft: '20px', color: '#475569', lineHeight: '2' }}>
-                <li>Category: {job.category}</li>
-                <li>Work Location: {job.location}</li>
-                <li>Job Type: Full-time</li>
-              </ul>
-            </section>
-          </main>
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
+          <button 
+            className="btn btn-primary" 
+            style={{ flex: 2, padding: '15px' }}
+            onClick={() => setShowApplyForm(!showApplyForm)}
+          >
+            {showApplyForm ? 'Cancel Application' : 'Apply for this Position'}
+          </button>
+          <button 
+            className="btn" 
+            style={{ flex: 1, border: '1px solid var(--primary-color)', color: 'var(--primary-color)', padding: '15px' }}
+            onClick={handleSaveJob}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save Job'}
+          </button>
+        </div>
 
-          <aside>
-            <div style={{ background: 'white', padding: '32px', borderRadius: '20px', border: '1px solid #e2e8f0', position: 'sticky', top: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-              {applied ? (
-                <div style={{ padding: "20px", background: "#f0fdf4", color: "#166534", borderRadius: "12px", textAlign: 'center', fontWeight: '600', border: '1px solid #bbf7d0' }}>
-                  ✅ Application Sent!
-                </div>
-              ) : (
-                <>
-                  <h3 style={{fontSize: '1.25rem', fontWeight: '700', marginBottom: '8px', color: '#1e293b'}}>Ready to apply?</h3>
-                  <p style={{fontSize: '0.9rem', marginBottom: '24px', color: '#64748b'}}>
-                    Apply today and start your next chapter.
-                  </p>
+        {showApplyForm && (
+          <form onSubmit={handleApply} className="job-card" style={{ padding: '30px', marginBottom: '40px', border: '1px solid #eee' }}>
+            <h3 style={{ marginBottom: '20px' }}>Submit Application</h3>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <label>Resume (Upload PDF or DOCX)</label>
+              <input 
+                type="file" 
+                accept=".pdf,.doc,.docx"
+                className="btn" 
+                style={{ width: '100%', border: '1px solid #ddd', padding: '12px', marginTop: '5px', cursor: 'pointer' }} 
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
                   
-                  <button 
-                    className="btn-purple" 
-                    style={{width: '100%', padding: '16px', borderRadius: '12px', fontWeight: '700', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s'}}
-                    onClick={handleApply}
-                    disabled={applying}
-                  >
-                    {applying ? "Processing..." : "Submit Application"}
-                  </button>
+                  const formData = new FormData();
+                  formData.append('file', file);
                   
-                  <button style={{width: '100%', marginTop: '12px', padding: '16px', background: 'transparent', border: '1px solid #e2e8f0', borderRadius: '12px', cursor: 'pointer', color: '#475569', fontWeight: '600'}}>
-                    Save for later
-                  </button>
-                </>
-              )}
-              
-              <div style={{ marginTop: '32px', pt: '32px', borderTop: '1px solid #f1f5f9' }}>
-                <div style={{ marginBottom: '16px', marginTop: '24px' }}>
-                  <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Industry</span>
-                  <p style={{ fontWeight: '600', color: '#334155' }}>{job.category}</p>
-                </div>
-                <div>
-                  <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Posted On</span>
-                  <p style={{ fontWeight: '600', color: '#334155' }}>{new Date().toLocaleDateString()}</p>
-                </div>
-              </div>
+                  try {
+                    setApplying(true); // Re-use applying state to show loading
+                    const res = await API.post('/upload', formData, {
+                      headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    setResumeUrl(res.data.url);
+                    setApplying(false);
+                  } catch (err) {
+                    console.error(err);
+                    alert('File upload failed');
+                    setApplying(false);
+                  }
+                }}
+                required={!resumeUrl} // Required only if no URL set
+              />
+              {resumeUrl && <p style={{ fontSize: '0.8rem', color: 'green', marginTop: '5px' }}>File uploaded: {resumeUrl.split('/').pop()}</p>}
             </div>
-          </aside>
+            <div style={{ marginBottom: '20px' }}>
+              <label>Cover Letter</label>
+              <textarea 
+                className="btn" 
+                style={{ width: '100%', minHeight: '120px', border: '1px solid #ddd', padding: '12px', marginTop: '5px', cursor: 'text', borderRadius: '8px' }} 
+                placeholder="Tell us why you are a great fit..."
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={applying}>
+              {applying ? 'Submitting...' : 'Send Application'}
+            </button>
+          </form>
+        )}
+
+        <div style={{ marginBottom: '40px' }}>
+          <h3 style={{ marginBottom: '15px', borderBottom: '2px solid #eee', paddingBottom: '10px' }}>Job Description</h3>
+          <p style={{ whiteSpace: 'pre-wrap', color: '#444' }}>{job.description}</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+          <div>
+            <h4 style={{ color: 'var(--text-light)', marginBottom: '5px' }}>Category</h4>
+            <p style={{ fontWeight: '500' }}>{job.category}</p>
+          </div>
+          <div>
+            <h4 style={{ color: 'var(--text-light)', marginBottom: '5px' }}>Experience Level</h4>
+            <p style={{ fontWeight: '500' }}>{job.experience_level || 'Mid-Senior'}</p>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default JobDetails;

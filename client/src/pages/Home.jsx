@@ -1,190 +1,180 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { mockJobs } from "../data/mockJobs"; 
-import heroBg from '../assets/brooke-cagle-g1Kr4Ozfoac-unsplash.jpg';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchJobs } from '../store/jobsSlice';
+import { fetchTalent } from '../store/usersSlice';
+import JobCard from '../components/JobCard';
+import TalentCard from '../components/TalentCard';
 
-const Home = () => {
-  const [keyword, setKeyword] = useState("");
-  const [location, setLocation] = useState("");
-  const [category, setCategory] = useState("");
-  const [jobs, setJobs] = useState(mockJobs);
+function Home() {
+  const dispatch = useDispatch();
+  const jobsState = useSelector((state) => state.jobs) || { list: [], status: 'idle' };
+  const usersState = useSelector((state) => state.users) || { talentList: [], status: 'idle' };
+  const { list: jobs, status: jobsStatus } = jobsState;
+  const { talentList: talent, status: usersStatus } = usersState;
+
+  const [searchType, setSearchType] = React.useState('jobs');
+  const [query, setQuery] = React.useState('');
+  const [locationQuery, setLocationQuery] = React.useState('');
+  const [categoryQuery, setCategoryQuery] = React.useState('');
+
+  const currentList = searchType === 'jobs' ? jobs : talent;
+  const currentStatus = searchType === 'jobs' ? jobsStatus : usersStatus;
 
   useEffect(() => {
-    const filtered = mockJobs.filter((job) => {
-      const matchesKeyword = job.title.toLowerCase().includes(keyword.toLowerCase());
-      const matchesLocation = job.location.toLowerCase().includes(location.toLowerCase());
-      const matchesCategory = category ? job.category === category : true;
-      return matchesKeyword && matchesLocation && matchesCategory;
-    });
-    setJobs(filtered);
-  }, [keyword, location, category]);
+    dispatch(fetchJobs()).catch(err => console.error("Initial fetch failed:", err));
+  }, [dispatch]);
 
-  const resetSearch = () => {
-    setKeyword("");
-    setLocation("");
-    setCategory("");
+  const handleSearch = () => {
+    if (searchType === 'talent') {
+      dispatch(fetchTalent(query));
+    } else {
+      const filters = {};
+      if (query && query.trim()) filters.title = query;
+      if (locationQuery && locationQuery.trim()) filters.location = locationQuery;
+      if (categoryQuery && categoryQuery !== 'Select Category' && categoryQuery !== 'All Categories') filters.category = categoryQuery;
+      
+      dispatch(fetchJobs(filters));
+    }
   };
 
   return (
-    <div style={{ padding: "0", maxWidth: "100%", margin: "0 auto" }}>
-      {/* --- Header Section --- */}
-      <header style={{ 
-        textAlign: "center", 
-        padding: "100px 20px", 
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url(${heroBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        borderBottom: '1px solid #eee'
-      }}>
-        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '20px', color: '#1e293b' }}>
-          Explore Opportunities
-        </h1>
-        
-        <div className="search-bar-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div className="search-field">
-            <span>🔍</span>
-            <input 
-              type="text" 
-              placeholder="Job title or keyword" 
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)} 
-            />
+    <div className="home-page">
+      <header className="hero">
+        <div className="container">
+          <h1 style={{ marginBottom: '15px' }}>Find Your Dream Job Today!</h1>
+          <p style={{ margin: '0 auto 40px', opacity: 0.9, maxWidth: '700px', fontSize: '1.2rem' }}>
+            Connecting Talent with Opportunity: Your Gateway to Career Success.
+          </p>
+          
+          <div className="advanced-search-bar">
+            <div className="search-field">
+              <span style={{ marginRight: '10px' }}>🔍</span>
+              <input 
+                type="text" 
+                placeholder="Job Title or Company" 
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <div className="search-field">
+              <span style={{ marginRight: '10px' }}>📍</span>
+              <input 
+                type="text" 
+                placeholder="Select Location" 
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <div className="search-field">
+              <span style={{ marginRight: '10px' }}>📁</span>
+              <select 
+                value={categoryQuery} 
+                onChange={(e) => setCategoryQuery(e.target.value)}
+              >
+                <option>All Categories</option>
+                <option>Engineering</option>
+                <option>Design</option>
+                <option>Marketing</option>
+                <option>HR</option>
+                <option>Data Science</option>
+                <option>Sales</option>
+                <option>Customer Support</option>
+              </select>
+            </div>
+            <button className="btn-search" onClick={handleSearch}>
+              Search Job
+            </button>
           </div>
-          <div className="search-field">
-            <span>📍</span>
-            <input 
-              type="text" 
-              placeholder="City or state" 
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: '10px', padding: '5px' }}>
-            <button className="btn-purple" style={{ width: '120px' }}>Search</button>
-            {(keyword || category || location) && (
-              <button onClick={resetSearch} className="btn-outline" style={{ padding: '10px' }}>Reset</button>
-            )}
+
+          <div className="stats-overview">
+            <div className="stat-card">
+              <div className="stat-icon">💼</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>25,850</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Jobs</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">👥</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>10,250</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Candidates</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">🏢</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '800', fontSize: '1.2rem' }}>18,400</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Companies</div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* --- Logo Marquee --- */}
-      <div className="logo-marquee">
-        <div className="marquee-content">
-          {[1, 2].map((loop) => (
-            <React.Fragment key={loop}>
-              <div className="marquee-item">🚀 TechFlow</div>
-              <div className="marquee-item">☁️ CloudNine</div>
-              <div className="marquee-item">⚡ SparkAI</div>
-              <div className="marquee-item">🔷 PrismCore</div>
-              <div className="marquee-item">🟢 GreenLeaf</div>
-              <div className="marquee-item">🎯 AimHigh</div>
-            </React.Fragment>
-          ))}
-        </div>
+      <div className="brand-bar">
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>slack</div>
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>Adobe</div>
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>asana</div>
+        <div style={{ color: 'white', fontWeight: '900', fontSize: '1.5rem', opacity: 0.9 }}>Linear</div>
       </div>
 
-      <div className="container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
-        {/* --- Testimonials --- */}
-        <section className="testimonials-section">
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '10px' }}>Testimonials from Our Customers</h2>
-          <p className="text-muted" style={{ marginBottom: '40px' }}>Trusted by professionals and companies worldwide.</p>
+      <main className="container">
+        <section style={{ padding: '60px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+            <div>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: 0 }}>Recent Job Listings</h2>
+              <p style={{ color: '#666', marginTop: '10px' }}>At eu lobortis pretium tincidunt amet lacus ut aenean aliquet...</p>
+            </div>
+            <span style={{ color: 'var(--primary-color)', fontWeight: '700', cursor: 'pointer', borderBottom: '2px solid' }}>View all</span>
+          </div>
           
-          <div className="testimonial-grid">
-            {[
-              { name: "Marco Kise", title: "Amazing services", text: "Found a senior role in weeks. The process was seamless.", initial: "M" },
-              { name: "Kristin Hester", title: "Everything simple", text: "The dashboard layout is the best I've used for job hunting.", initial: "K" },
-              { name: "Zion Cisneros", title: "Awesome, thank you!", text: "As an employer, I found top-tier talent effortlessly here.", initial: "Z" }
-            ].map((t, i) => (
-              <div key={i} className="testimonial-card">
-                <div style={{ color: '#fbbf24', marginBottom: '10px' }}>★★★★★</div>
-                <h4 style={{ fontWeight: 700, marginBottom: '8px' }}>{t.title}</h4>
-                <p className="text-muted" style={{ fontSize: '0.95rem', fontStyle: 'italic' }}>"{t.text}"</p>
-                <div className="user-info">
-                  <div className="user-avatar">{t.initial}</div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Happy Client</div>
-                  </div>
-                </div>
-                <span className="quote-icon">“</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '60px 0' }} />
-
-        {/* --- Category Filtering --- */}
-        <section id="job-listings" style={{ scrollMarginTop: '100px', margin: '40px 0' }}>
-          <h3 style={{ fontWeight: 700, marginBottom: '15px' }}>Browse by Category</h3>
-          <div className="category-pills">
-            {['Technology', 'Marketing', 'Design', 'Commerce'].map(cat => (
-              <label key={cat} className={`category-pill ${category === cat ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="category"
-                  style={{ display: 'none' }}
-                  checked={category === cat}
-                  onChange={() => setCategory(cat)}
-                />
-                <span>{cat}</span>
-              </label>
-            ))}
-          </div>
-        </section>
-
-        {/* --- Job Feed --- */}
-        <main className="job-feed" style={{ marginTop: '20px', paddingBottom: '80px' }}>
-          <h3 style={{ fontWeight: 700, marginBottom: '20px' }}>Latest Opportunities</h3>
-          {jobs.length > 0 ? (
-            jobs.map((job) => (
-              <div key={job.id} className="stat-card" style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', // Fixes vertical stretching
-                marginBottom: '16px', 
-                padding: '24px', 
-                border: '1px solid #f1f5f9', 
-                borderRadius: '16px',
-                backgroundColor: 'white'
-              }}>
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                  <div className="company-logo-placeholder">
-                    {job.company ? job.company[0] : 'J'}
-                  </div>
-                  <div>
-                    <h3 style={{ marginBottom: '4px', fontWeight: 700 }}>{job.title}</h3>
-                    <p className="text-muted">{job.company} • {job.location}</p>
-                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-                      <span className="status-pill">💰 ${job.salary?.toLocaleString() || 'N/A'}</span>
-                      <span className="status-pill" style={{ textTransform: 'uppercase' }}>🏷️ {job.category}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <Link to={`/jobs/${job.id}`} className="btn-purple" style={{ 
-                  textDecoration: 'none', 
-                  padding: '12px 28px',
-                  width: 'auto', // Fixes horizontal stretching
-                  minWidth: '100px',
-                  textAlign: 'center'
-                }}>
-                  Details
-                </Link>
-              </div>
-            ))
-          ) : (
-            <div className="stat-card" style={{ textAlign: 'center', padding: '60px' }}>
-              <p className="text-muted">No jobs found matching your criteria.</p>
-              <button onClick={resetSearch} className="btn-purple" style={{ width: 'auto', marginTop: '15px' }}>Clear all filters</button>
+          {currentStatus === 'failed' && (
+            <div style={{ textAlign: 'center', color: 'red', marginBottom: '20px' }}>
+              Oops! We couldn't fetch the results. Please make sure the backend is running.
             </div>
           )}
-        </main>
-      </div>
+
+          <div className="job-list">
+            {currentStatus === 'loading' ? (
+              <div style={{ textAlign: 'center', padding: '50px' }}>
+                <div className="spinner" style={{ borderColor: 'var(--primary-color)', borderTopColor: 'transparent', width: '40px', height: '40px', margin: '0 auto' }}></div>
+              </div>
+            ) : (
+              Array.isArray(currentList) && currentList.length > 0 ? (
+                currentList.map((item) => (
+                  searchType === 'jobs' 
+                    ? <JobCard key={item.id} job={item} />
+                    : <TalentCard key={item.id} talent={item} />
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '100px', background: '#f9f9f9', borderRadius: '20px', color: '#666' }}>
+                  No jobs found matching your criteria. Try adjusting your search!
+                </div>
+              )
+            )}
+          </div>
+
+          <div style={{ marginTop: '80px', background: '#f5f5f5', padding: '40px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '50px' }}>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ marginBottom: '15px', fontSize: '2rem' }}>Ready for your next move?</h2>
+              <p style={{ color: '#666', marginBottom: '30px', fontSize: '1.1rem' }}>Create your profile and let top employers find you. Join thousands of professionals growing their careers on RecruitConnect.</p>
+              <button className="btn btn-primary" style={{ padding: '15px 40px', borderRadius: '12px' }}>Get Started Now</button>
+            </div>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+              <img 
+                src="/images/hero_purple.png" 
+                alt="App Interface" 
+                style={{ width: '400px', borderRadius: '10px' }}
+              />
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
-};
+}
 
 export default Home;
