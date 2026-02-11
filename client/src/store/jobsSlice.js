@@ -1,9 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import API from '../api';
+import axios from 'axios'; // 1. Added missing axios import
 
 // Async thunk to fetch jobs from the backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export const fetchJobs = createAsyncThunk('jobs/fetchJobs', async (filters) => {
-  const response = await axios.get('http://localhost:5000/api/jobs', { params: filters }); // Or fetch()
+  // Use the variable here
+  const response = await axios.get(`${API_BASE_URL}/api/jobs`, { params: filters });
   return response.data;
 });
 
@@ -23,11 +26,14 @@ const jobsSlice = createSlice({
       })
       .addCase(fetchJobs.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.list = action.payload;
+        // 2. SAFETY CHECK: If the API returns a 404 HTML page instead of an array,
+        // this defaults to an empty list [] so .filter() won't crash later.
+        state.list = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchJobs.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+        state.list = []; // Ensure list stays an array even on failure
       });
   },
 });
