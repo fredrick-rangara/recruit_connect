@@ -5,7 +5,7 @@
     "watchPatterns": ["server/**"]
   },
   "deploy": {
-    "startCommand": "gunicorn --chdir server 'app:create_app()'",
+    "startCommand": "cd server && gunicorn wsgi:app",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
