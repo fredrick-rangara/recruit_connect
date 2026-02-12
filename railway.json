@@ -5,8 +5,7 @@
     "watchPatterns": ["backend/**"]
   },
   "deploy": {
-    "preDeploy": "cd backend && python create_tables.py",
-    "startCommand": "cd backend && gunicorn wsgi:app --bind 0.0.0.0:$PORT",
+    "startCommand": "cd backend && python create_tables.py && gunicorn wsgi:app --bind 0.0.0.0:$PORT",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
