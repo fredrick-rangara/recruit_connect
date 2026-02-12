@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios"; // 1. Added missing axios import
 
 // Async thunk to fetch jobs from the backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export const fetchJobs = createAsyncThunk("jobs/fetchJobs", async (filters) => {
   // Use the variable here
