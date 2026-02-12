@@ -5,19 +5,25 @@ import toast from 'react-hot-toast';
 export default function EmployerDashboard() {
   const [myJobs, setMyJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const pending = job.applicants.filter(a => a.status === 'Pending');
-  const accepted = job.applicants.filter(a => a.status === 'Accepted');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:5000/api/employer/jobs', {
+    axios.get('http://localhost:5000/api/dashboard', {
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => {
-      setMyJobs(res.data);
+      // The API returns { role: 'employer', postings: [...] }
+      if (res.data.postings) {
+        setMyJobs(res.data.postings);
+      } else {
+        setMyJobs([]);
+      }
       setLoading(false);
     })
-    .catch(() => setLoading(false));
+    .catch((err) => {
+      console.error("Failed to fetch dashboard:", err);
+      setLoading(false);
+    });
   }, []);
 
   const updateStatus = async (applicationId, newStatus) => {
@@ -45,8 +51,12 @@ export default function EmployerDashboard() {
 
         {loading ? (
           <p>Loading your listings...</p>
+        ) : myJobs.length === 0 ? (
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 text-center">
+            <p className="text-slate-500">No job listings found. Post your first job!</p>
+          </div>
         ) : myJobs.map(job => (
-          <div key={job.id} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 mb-8">
+          <div key={job.job_id} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 mb-8">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-2xl font-black text-purple-600">{job.title}</h2>
@@ -60,31 +70,16 @@ export default function EmployerDashboard() {
                 <thead>
                   <tr className="text-slate-400 text-xs uppercase tracking-widest border-b border-slate-50">
                     <th className="pb-4">Candidate</th>
-                    <th className="pb-4">CV / Resume</th>
                     <th className="pb-4">Status</th>
                     <th className="pb-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {job.applicants && job.applicants.map(applicant => (
-                    <tr key={applicant.id} className="group">
+                    <tr key={applicant.app_id} className="group">
                       <td className="py-4">
-                        <p className="font-bold text-slate-900">{applicant.name}</p>
+                        <p className="font-bold text-slate-900">{applicant.candidate_name}</p>
                         <p className="text-xs text-slate-400">{applicant.email}</p>
-                      </td>
-                      <td className="py-4">
-                        {applicant.cvPath ? (
-                          <a 
-                            href={`http://localhost:5000${applicant.cvPath}`} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="bg-slate-100 px-4 py-2 rounded-lg text-xs font-black hover:bg-purple-600 hover:text-white transition-all inline-block"
-                          >
-                            📄 View CV
-                          </a>
-                        ) : (
-                          <span className="text-slate-300 text-xs italic">No CV uploaded</span>
-                        )}
                       </td>
                       <td className="py-4">
                         <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-full uppercase">
@@ -93,13 +88,13 @@ export default function EmployerDashboard() {
                       </td>
                       <td className="py-4 text-right space-x-2">
                         <button 
-                          onClick={() => updateStatus(applicant.id, 'Accepted')}
+                          onClick={() => updateStatus(applicant.app_id, 'Accepted')}
                           className="text-emerald-500 hover:text-emerald-700 font-bold text-xs"
                         >
                           Accept
                         </button>
                         <button 
-                          onClick={() => updateStatus(applicant.id, 'Rejected')}
+                          onClick={() => updateStatus(applicant.app_id, 'Rejected')}
                           className="text-red-400 hover:text-red-600 font-bold text-xs"
                         >
                           Reject
