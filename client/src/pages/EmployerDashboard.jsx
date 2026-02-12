@@ -10,6 +10,7 @@ function EmployerDashboard() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewingJob, setViewingJob] = useState(null);
+  const [selectedApp, setSelectedApp] = useState(null);
 
   const STAGES = [
     { id: 'applied', label: 'Applied', color: '#3498db' },

@@ -38,6 +38,12 @@ def create_app():
         app.register_blueprint(users_bp, url_prefix='/api/users')
         app.register_blueprint(upload_bp, url_prefix='/api/upload')
         
+        # Create upload folder if it doesn't exist
+        import os
+        upload_folder = app.config.get('UPLOAD_FOLDER', 'uploads')
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        
     return app
 
 if __name__ == '__main__':
@@ -50,3 +56,4 @@ if __name__ == '__main__':
         except ValueError:
             pass
     app.run(host='0.0.0.0', port=port, debug=True)
+

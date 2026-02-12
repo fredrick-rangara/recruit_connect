@@ -1,5 +1,5 @@
 from app import create_app
-from models import db, Company, Job, User
+from models import db, Company, Job, User, EmployerProfile, Application
 
 app = create_app()
 
@@ -54,12 +54,10 @@ with app.app_context():
     db.session.commit()
 
     # Create employer profile link
-    from models import EmployerProfile
     ep = EmployerProfile(user_id=employer.id, company_id=c1.id, job_title="Senior Recruiter")
     db.session.add(ep)
     
     # Create sample applications
-    from models import Application
     a1 = Application(user_id=seekers[0].id, job_id=jobs[0].id, resume_url="https://drive.com/resume-alice", cover_letter="I am very interested in the Frontend role.", status="applied")
     a2 = Application(user_id=seekers[1].id, job_id=jobs[0].id, resume_url="https://drive.com/resume-bob", cover_letter="I have great UI/UX skills.", status="screening")
     a3 = Application(user_id=seekers[2].id, job_id=jobs[1].id, resume_url="https://drive.com/resume-charlie", cover_letter="Python developer ready for Backend challenges.", status="interview")
