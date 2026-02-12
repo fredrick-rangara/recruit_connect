@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python311", "gcc", "postgresql"]
+
+[phases.install]
+cmds = ["python3 -m pip install -r server/requirements.txt"]
+
+[start]
+cmd = "cd server && gunicorn wsgi:app"
