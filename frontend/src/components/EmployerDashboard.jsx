@@ -21,39 +21,32 @@ function EmployerDashboard() {
     fetchDashboardData();
   }, [isAuthenticated, user, navigate]);
 
-  const fetchDashboardData = async () => {
+const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const dashboardRes = await API.get('/dashboard');
+      const dashboardRes = await API.get('/api/dashboard');
       
       if (dashboardRes.data.role === 'employer' && dashboardRes.data.postings) {
+        // 1. Transform Jobs
         const transformedJobs = dashboardRes.data.postings.map(posting => ({
           id: posting.job_id,
           title: posting.title,
-          applications: posting.applicants.map(app => ({
+          // Store raw applicants here for the Job Modal
+          applicants: posting.applicants 
+        }));
+        setJobs(transformedJobs);
+        
+        const allApps = dashboardRes.data.postings.flatMap(posting => 
+          posting.applicants.map(app => ({
             id: app.app_id,
+            job_id: posting.job_id,
+            job: { title: posting.title },
             user: { username: app.candidate_name, email: app.email },
             status: app.status,
             resume_url: app.resume_url,
             cover_letter: app.cover_letter
           }))
-        }));
-        setJobs(transformedJobs);
-        
-        const allApps = [];
-        dashboardRes.data.postings.forEach(posting => {
-          posting.applicants.forEach(app => {
-            allApps.push({
-              id: app.app_id,
-              job_id: posting.job_id,
-              job: { title: posting.title },
-              user: { username: app.candidate_name, email: app.email },
-              status: app.status,
-              resume_url: app.resume_url,
-              cover_letter: app.cover_letter
-            });
-          });
-        });
+        );
         setApplications(allApps);
       }
     } catch (err) {
@@ -64,11 +57,15 @@ function EmployerDashboard() {
     }
   };
 
-  const updateApplicationStatus = async (applicationId, newStatus) => {
+const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
-      await API.patch(\`/applications/\${applicationId}\`, { status: newStatus });
-      toast.success(\`Application moved to \${newStatus}\`);
-      fetchDashboardData();
+      await API.patch(`/api/applications/${applicationId}`, { status: newStatus });
+      toast.success(`Application moved to ${newStatus}`);
+      
+      // Refresh data to update the counts and UI
+      await fetchDashboardData();
+      
+      // Close the review modal after action
       setSelectedApplication(null);
     } catch (err) {
       console.error('Error updating status:', err);

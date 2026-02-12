@@ -1,74 +1,41 @@
-# Backend Implementation Progress
+# Fix Errors in RecruitConnect
 
-## Phase 1: Core Configuration ✅
-- [x] Plan backend implementation
-- [x] Create requirements.txt
-- [x] Create config.py
-- [x] Create models.py
+## Errors Identified:
+1. Missing API Configuration (`api.js` file doesn't exist)
+2. Inconsistent API URLs across frontend components
+3. Missing Authorization Headers for JWT
+4. Route Mismatch between frontend and backend
+5. Invalid Syntax in Signup.jsx
 
-## Phase 2: Authentication & RBAC ✅
-- [x] Create decorators.py (RBAC decorators)
-- [x] Create auth.py (JWT authentication routes)
+## Fixes to Implement:
 
-## Phase 3: API Routes ✅
-- [x] Create routes/jobs.py
-- [x] Create routes/applications.py
-- [x] Create routes/__init__.py
+### 1. Create API Configuration
+- [x] Create `frontend/src/api.js` with axios instance and JWT interceptors
 
-## Phase 4: Application Entry ✅
-- [x] Create main.py
-- [x] Create init_db.py
+### 2. Fix EmployerDashboard.jsx
+- [x] Update to use proper API endpoints
+- [x] Fix dashboard endpoint to `/api/dashboard`
+- [x] Fix application status update endpoint to `/api/applications/:id`
+- [x] Add proper error handling
 
-## Phase 5: Testing & Verification
-- [ ] Install dependencies: `pip install -r server/requirements.txt`
-- [ ] Set up PostgreSQL database
-- [ ] Configure environment variables in .env
-- [ ] Initialize database: `python server/init_db.py`
-- [ ] Run the server: `python server/main.py`
-- [ ] Test authentication endpoints
-- [ ] Verify RBAC implementation
+### 3. Fix Login.jsx
+- [x] Update endpoint to `/api/auth/login`
+- [x] Add proper JWT token storage
+- [x] Fix navigation logic based on user role
 
-## Quick Start Commands
-```bash
-# 1. Install dependencies
-cd /home/dominic/recruit_connect
-pip install -r server/requirements.txt
+### 4. Fix Signup.jsx
+- [x] Fix invalid `throws` keyword
+- [x] Fix invalid `aria-placeholder` attribute
+- [x] Update endpoint to `/api/auth/register`
+- [x] Add proper form field names matching backend
 
-# 2. Create .env file with database credentials
-cp server/.env.example server/.env
+### 5. Fix Backend Routes
+- [x] Create proper dashboard blueprint in routes.py
+- [x] Register dashboard blueprint in app.py
+- [x] Remove duplicate dashboard code from app.py
 
-# 3. Initialize database and create sample data
-python server/init_db.py --reset
-
-# 4. Run the server
-python server/main.py
-```
-
-## API Endpoints
-
-### Authentication (JWT)
-- `POST /api/auth/register` - Register new user (employer/job_seeker)
-- `POST /api/auth/login` - Login and get tokens
-- `GET /api/auth/me` - Get current user info
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/logout` - Logout
-- `POST /api/auth/change-password` - Change password
-
-### Jobs (Employer Routes)
-- `GET /api/jobs` - Get all jobs (all authenticated users)
-- `GET /api/jobs/<id>` - Get job details
-- `POST /api/jobs` - Create job (employer only)
-- `PUT /api/jobs/<id>` - Update job (owner employer)
-- `DELETE /api/jobs/<id>` - Delete job (owner employer)
-- `GET /api/jobs/my-jobs` - Get employer's jobs
-- `GET /api/jobs/<id>/applications` - Get job applications (owner employer)
-
-### Applications (Job Seeker Routes)
-- `POST /api/applications` - Apply to job (job seeker)
-- `GET /api/applications` - Get user's applications
-- `GET /api/applications/<id>` - Get application details
-- `POST /api/applications/<id>/withdraw` - Withdraw application
-- `PUT /api/applications/<id>/status` - Update status (employer)
-- `DELETE /api/applications/<id>` - Delete application
-- `GET /api/applications/job/<id>/check` - Check if applied
+## Follow-up Steps:
+- [ ] Run `npm install` in frontend to verify dependencies
+- [ ] Run backend server to test API endpoints
+- [ ] Test login/signup flow
 

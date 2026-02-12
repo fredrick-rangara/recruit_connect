@@ -22,19 +22,21 @@ export default function Login() {
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const res = await axios.post('http://127.0.0.1:5000/login', { email:formData.email, password:formData.password });
+    const res = await axios.post('http://127.0.0.1:5000/api/auth/login', { email:formData.email, password:formData.password });
 
-    
-    
-    // This is the critical part:
+    // Store token and user info
     localStorage.setItem('token', res.data.access_token);
-    localStorage.setItem('user', JSON.stringify(res.data.user)); // Saves {id, name, role}
+    localStorage.setItem('user', JSON.stringify(res.data.user));
     
-   
-    navigate('/'); 
+    // Navigate based on role
+    if (res.data.role === 'employer') {
+      navigate('/dashboard');
+    } else {
+      navigate('/applications');
+    }
     window.location.reload(); // Refresh to update the Navbar and state
   } catch (err) {
-    alert(err.response?.data?.message || "Login failed");
+    alert(err.response?.data?.msg || "Login failed");
   }
 };
 

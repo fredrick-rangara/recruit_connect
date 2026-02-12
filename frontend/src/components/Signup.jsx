@@ -18,13 +18,19 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const finalData = { ...formData, role }; // Include role in submission
+    const finalData = { 
+      full_name: `${formData.firstName} ${formData.lastName}`,
+      email: formData.email, 
+      password: formData.password,
+      role: role 
+    };
     
     try {
-      await axios.post('http://localhost:5000/api/signup', finalData);
+      await axios.post('http://127.0.0.1:5000/api/auth/register', finalData);
       navigate('/login');
     } catch (err) {
       console.error("Signup failed", err);
+      alert(err.response?.data?.msg || "Signup failed");
     }
   };
 
@@ -90,7 +96,7 @@ export default function Signup() {
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
-              <input name="password" onChange={handleChange} type="password" throws aria-placeholder="••••••••" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:border-purple-600 transition-all" placeholder="••••••••" />
+              <input name="password" onChange={handleChange} type="password" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:border-purple-600 transition-all" placeholder="••••••••" />
             </div>
             <button className="col-span-2 mt-4 bg-purple-600 text-white py-4 rounded-2xl font-black hover:bg-black transition-all shadow-xl shadow-purple-100">
               Create {role === 'seeker' ? 'Seeker' : 'Employer'} Account
