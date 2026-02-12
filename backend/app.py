@@ -1,59 +1,59 @@
-from flask import Flask, jsonify # Add jsonify
-from flask_jwt_extended import JWTManager
-from flask_cors import CORS
-from dotenv import load_dotenv
-from models import db, Job # Import Job model here
-import os
+# Import Flask core and extensions for migration, CORS, and JWT authentication
+from flask import Flask
 from flask_migrate import Migrate
-from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from models import db, bcrypt
+from config import Config
 
-from auth import auth_bp
-
-# load env vars
-load_dotenv()
-
-
-app = Flask(__name__)
-# setup a bcrypt instance
-bcrypt = Bcrypt(app)
-
-CORS(app)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URI")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
-
-jwt = JWTManager(app)
-# instatiate Migrate class
-migrate = Migrate(app=app, db=db)
-
-db.init_app(app) 
-
-# register blueprints
-app.register_blueprint(auth_bp)
-
-# --- ADD THIS ROUTE ---
-@app.route('/api/jobs', methods=['GET'])
-def get_jobs():
-    try:
-        jobs = Job.query.all()
-        return jsonify([{
-            "id": j.id,
-            "title": j.title,
-            "company": j.company,
-            "location": j.location,
-            "salary": j.salary,
-            "description": j.description
-        } for j in jobs]), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-# ----------------------
-
-@app.route('/')
-def index():
-    return {"message": "RecruitConnect API is running"}
+# App factory function to create and configure the Flask application
+def create_app():
+    app = Flask(__name__)
+    # Load configuration settings (database URI, secrets, etc.)
+    app.config.from_object(Config)
+    
+    # Initialize extensions with the app instance
+    db.init_app(app)
+    bcrypt.init_app(app)
+    migrate = Migrate(app, db)
+    jwt = JWTManager(app)
+    CORS(app) # Enable Cross-Origin Resource Sharing for the frontend
+    
+    with app.app_context():
+        # Import and register blueprints to organize routes into logical groups
+        from routes.auth import auth_bp
+        from routes.jobs import jobs_bp
+        from routes.applications import applications_bp
+        from routes.companies import companies_bp
+        from routes.notifications import notifications_bp
+        from routes.users import users_bp
+        from routes.upload import upload_bp
+        
+        # Define URL prefix for each blueprint
+        app.register_blueprint(auth_bp, url_prefix='/api/auth')
+        app.register_blueprint(jobs_bp, url_prefix='/api/jobs')
+        app.register_blueprint(applications_bp, url_prefix='/api/applications')
+        app.register_blueprint(companies_bp, url_prefix='/api/companies')
+        app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+        app.register_blueprint(users_bp, url_prefix='/api/users')
+        app.register_blueprint(upload_bp, url_prefix='/api/upload')
+        
+        # Create upload folder if it doesn't exist
+        import os
+        upload_folder = app.config.get('UPLOAD_FOLDER', 'uploads')
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        
+    return app
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+    import sys
+    app = create_app()
+    port = 5000
+    if len(sys.argv) > 1:
+        try:
+            port = int(sys.argv[1])
+        except ValueError:
+            pass
+    app.run(host='0.0.0.0', port=port, debug=True)
+
