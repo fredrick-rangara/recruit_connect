@@ -1,17 +1,36 @@
 from flask import Flask, jsonify # Add jsonify
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from dotenv import load_dotenv
 from models import db, Job # Import Job model here
+import os
+from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
+
+from auth import auth_bp
+
+# load env vars
+load_dotenv()
+
 
 app = Flask(__name__)
+# setup a bcrypt instance
+bcrypt = Bcrypt(app)
+
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///job_hunter'
-app.config['JWT_SECRET_KEY'] = 'your-super-secret-key'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URI")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+
+jwt = JWTManager(app)
+# instatiate Migrate class
+migrate = Migrate(app=app, db=db)
 
 db.init_app(app) 
-jwt = JWTManager(app)
+
+# register blueprints
+app.register_blueprint(auth_bp)
 
 # --- ADD THIS ROUTE ---
 @app.route('/api/jobs', methods=['GET'])

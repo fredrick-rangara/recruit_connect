@@ -7,6 +7,7 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,33 +20,23 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  try {
+    const res = await axios.post('http://127.0.0.1:5000/login', { email:formData.email, password:formData.password });
 
-    try {
-      // FIX 1: Use variables from formData
-      const { email, password } = formData;
-      
-      const res = await axios.post('http://localhost:5000/api/login', { email, password });
-      
-      // FIX 2: res.data contains the info from our backend logic
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user || res.data));
-      
-      toast.success(`Welcome back, ${res.data.user?.name || 'User'}!`);
-
-      // SUCCESS: Navigate
-      navigate(from, { replace: true }); 
-      
-    } catch (err) {
-      console.error("Login detail error:", err.response?.data);
-      setError(err.response?.data?.message || 'Invalid email or password');
-      toast.error(err.response?.data?.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+    
+    
+    // This is the critical part:
+    localStorage.setItem('token', res.data.access_token);
+    localStorage.setItem('user', JSON.stringify(res.data.user)); // Saves {id, name, role}
+    
+   
+    navigate('/'); 
+    window.location.reload(); // Refresh to update the Navbar and state
+  } catch (err) {
+    alert(err.response?.data?.message || "Login failed");
+  }
+};
 
   return (
     <div className="min-h-screen bg-white flex pt-20">

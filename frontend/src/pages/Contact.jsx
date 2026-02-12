@@ -1,76 +1,131 @@
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import { FiMail, FiPhone, FiMapPin, FiSend } from 'react-icons/fi';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 export default function Contact() {
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Get user ID from local storage if logged in
+  const user = JSON.parse(localStorage.getItem('user')) || null;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      toast.success("Message sent! We'll be in touch soon.");
-      setLoading(false);
-      e.target.reset();
-    }, 1500);
+    setIsSubmitting(true);
+    
+    try {
+      const payload = {
+        ...formData,
+        userId: user?.id || null // Pass userId to link message to an account
+      };
+
+      const response = await axios.post('http://localhost:5000/api/contact', payload);
+      
+      if (response.status === 201) {
+        toast.success("Message sent! We'll get back to you soon.");
+        setFormData({ name: '', email: '', message: '' });
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error(error.response?.data?.message || "Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="pt-32 pb-20 px-4 min-h-screen bg-slate-50">
-      <div className="max-w-5xl mx-auto bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        {/* Contact Info Sidebar */}
-        <div className="md:w-2/5 bg-slate-900 p-12 text-white flex flex-col justify-between">
-          <div>
-            <h2 className="text-4xl font-black mb-6 leading-tight">Let's <br />Talk.</h2>
-            <p className="text-slate-400 font-medium mb-10">Have questions about your account or need help with a posting?</p>
-            
-            <div className="space-y-6">
-              <div>
-                <p className="text-purple-400 text-xs font-black uppercase tracking-widest mb-1">Email Us</p>
-                <p className="text-lg font-bold">info@recruitconnect.com</p>
+    <div className="min-h-screen bg-white pt-32 pb-20 px-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        
+        {/* LEFT SIDE: INFO */}
+        <div>
+          <span className="text-purple-600 font-black text-xs uppercase tracking-[0.3em] mb-4 block">Get in Touch</span>
+          <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter mb-8">
+            How can we <span className="text-purple-600">help you?</span>
+          </h1>
+          <p className="text-slate-500 font-medium text-lg mb-12 leading-relaxed">
+            Whether you're looking for a job or looking for talent, our team is here to support your journey.
+          </p>
+
+          <div className="space-y-8">
+            <div className="flex items-center gap-6 group">
+              <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                <FiMail size={24} />
               </div>
               <div>
-                <p className="text-purple-400 text-xs font-black uppercase tracking-widest mb-1">Visit Us</p>
-                <p className="text-lg font-bold">101 Innovation Way, Tech Hub</p>
+                <h4 className="font-black text-slate-900">Email Us</h4>
+                <p className="text-slate-500 font-bold">support@recruitconnect.com</p>
               </div>
             </div>
-          </div>
-          
-          <div className="pt-10 border-t border-slate-800">
-            <p className="text-slate-500 text-sm">Response time: &lt; 24 hours</p>
+
+            <div className="flex items-center gap-6 group">
+              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                <FiPhone size={24} />
+              </div>
+              <div>
+                <h4 className="font-black text-slate-900">Call Us</h4>
+                <p className="text-slate-500 font-bold">+1 (555) 000-0000</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6 group">
+              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                <FiMapPin size={24} />
+              </div>
+              <div>
+                <h4 className="font-black text-slate-900">Visit Us</h4>
+                <p className="text-slate-500 font-bold">123 Tech Avenue, San Francisco</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Form */}
-        <div className="md:w-3/5 p-12">
+        {/* RIGHT SIDE: FORM */}
+        <div className="bg-slate-900 rounded-[3rem] p-10 md:p-14 text-white shadow-2xl shadow-purple-200">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Name</label>
-                <input type="text" required className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-purple-600 outline-none transition-all" placeholder="John Doe" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
-                <input type="email" required className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-purple-600 outline-none transition-all" placeholder="john@example.com" />
-              </div>
-            </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Subject</label>
-              <select className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-purple-600 outline-none transition-all font-medium">
-                <option>General Inquiry</option>
-                <option>Technical Support</option>
-                <option>Employer Partnership</option>
-              </select>
+              <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Full Name</label>
+              <input 
+                type="text"
+                required
+                className="w-full bg-slate-800 border-none rounded-2xl p-4 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+              />
             </div>
+
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
-              <textarea rows="4" required className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-purple-600 outline-none transition-all" placeholder="How can we help?"></textarea>
+              <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Email Address</label>
+              <input 
+                type="email"
+                required
+                className="w-full bg-slate-800 border-none rounded-2xl p-4 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
             </div>
+
+            <div>
+              <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Your Message</label>
+              <textarea 
+                required
+                rows="4"
+                className="w-full bg-slate-800 border-none rounded-2xl p-4 text-white focus:ring-2 focus:ring-purple-500 outline-none transition-all resize-none"
+                placeholder="How can we help you?"
+                value={formData.message}
+                onChange={(e) => setFormData({...formData, message: e.target.value})}
+              ></textarea>
+            </div>
+
             <button 
-              disabled={loading}
-              className="w-full bg-purple-600 text-white py-5 rounded-2xl font-black hover:bg-black transition-all shadow-xl shadow-purple-100 flex justify-center items-center gap-3"
+              disabled={isSubmitting}
+              className="w-full bg-purple-600 hover:bg-white hover:text-black text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
             >
-              {loading ? "Sending..." : "Send Message"}
+              {isSubmitting ? "Sending..." : "Send Message"}
+              <FiSend />
             </button>
           </form>
         </div>
